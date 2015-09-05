@@ -1,6 +1,9 @@
 package arashincleric.com.magicapplicationfun;
 
 import android.content.res.Configuration;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
@@ -15,12 +18,13 @@ import android.widget.ListView;
 
 public class MainActivity extends ActionBarActivity {
 
+    private final String ARG_LIFE_COUNTER_FRAGMENT = "LifeCounter";
+    private final String ARG_CARD_LOOKUP = "CardLookup";
     private ListView mDrawerList;
-    private ArrayAdapter<String> mAdapter;
 
     private ActionBarDrawerToggle mDrawerToggle;
     private DrawerLayout mDrawerLayout;
-    private String mActivityTitle;
+    private Fragment mContent;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,7 +34,6 @@ public class MainActivity extends ActionBarActivity {
         mDrawerList = (ListView)findViewById(R.id.navList);
         mDrawerLayout = (DrawerLayout)findViewById(R.id.drawer_layout);
         setTitle(R.string.application_title);
-        mActivityTitle = getTitle().toString();
 
         //If something already present
         if(findViewById(R.id.fragment_container) != null) {
@@ -52,11 +55,61 @@ public class MainActivity extends ActionBarActivity {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 //TODO: Fragment logic here
-
+                switch(position){
+                    case 0:
+                        switchFragment(ARG_LIFE_COUNTER_FRAGMENT);
+                        break;
+                    case 1:
+                        switchFragment(ARG_CARD_LOOKUP);
+                        break;
+                    default:
+                        break;
+                }
                 mDrawerLayout.closeDrawers();
             }
         });
 
+    }
+
+    private void switchFragment(String sel){
+        //Check to see if selected fragment is currently visible
+        if(mContent == null || !mContent.getTag().equals(sel)){
+            FragmentManager fragmentManager = getSupportFragmentManager();
+            FragmentTransaction transaction = fragmentManager.beginTransaction();
+
+            //Try to find the fragment
+            Fragment fragment = fragmentManager.findFragmentByTag(sel);
+
+            //detach current attached fragment
+            if(mContent != null){
+                transaction.detach(mContent);
+            }
+
+            //Make new instance of fragment if not before
+            if(fragment == null){
+                switch (sel) {
+                    case ARG_LIFE_COUNTER_FRAGMENT:
+                        mContent = ScoreFragment.newInstance("20");
+                        break;
+                    case ARG_CARD_LOOKUP:
+                        mContent = CardLookupFragment.newInstance();
+                        break;
+                    default:
+                        mContent = ScoreFragment.newInstance("20");
+                }
+            }
+            else {
+                mContent = fragment;
+            }
+            if(mContent.isAdded() || mContent.isDetached()) {
+                transaction.attach(mContent);
+            }
+            else{
+                transaction.add(R.id.fragment_container, mContent, sel);
+            }
+
+            transaction.commit();
+        }
     }
 
     private void setupDrawer() {
@@ -88,7 +141,7 @@ public class MainActivity extends ActionBarActivity {
 
     private void addDrawerItems(){
         String[] navListArray = {"Life Counter", "Card Lookup", "Decklist"};
-        mAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, navListArray);
+        ArrayAdapter<String> mAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, navListArray);
         mDrawerList.setAdapter(mAdapter);
     }
     @Override

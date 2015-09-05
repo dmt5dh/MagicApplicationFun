@@ -7,4 +7,12 @@
     <string name="drawer_open">Open navigation drawer</string>
     <string name="drawer_close">Close navigation drawer</string>
     <string name="navigation_title">Navigation</string>
+    <string name="score_value">20</string>
+    <string name="increase_score">+</string>
+    <string name="decrease_score">-</string>
+    <string name="replay_yes">yes</string>
+    <string name="replay_no">no</string>
+
+<!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>
