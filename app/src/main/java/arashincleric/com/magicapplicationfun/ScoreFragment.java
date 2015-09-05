@@ -2,18 +2,18 @@ package arashincleric.com.magicapplicationfun;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.annotation.NonNull;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.TextView;
 
 
@@ -26,7 +26,7 @@ import android.widget.TextView;
 public class ScoreFragment extends Fragment {
 
     private static final String ARG_SCORE = "SCORE";
-
+    private SharedPreferences sharedPreferences;
 
     private int score;
     private TextView scoreView;
@@ -59,6 +59,7 @@ public class ScoreFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         setRetainInstance(true);
+        sharedPreferences = getActivity().getPreferences(Context.MODE_PRIVATE);
         // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_score, container, false);
     }
@@ -84,10 +85,12 @@ public class ScoreFragment extends Fragment {
 
         scoreView = (TextView)view.findViewById(R.id.scoreView);
 
-        if(savedInstanceState != null){
-            String mScore = getArguments().getString(ARG_SCORE);
-            scoreView.setText(savedInstanceState.getString(mScore));
-            score = Integer.parseInt(mScore);
+        String savedScore = sharedPreferences.getString(ARG_SCORE, null);
+
+        if(savedScore != null){
+//            String mScore = getArguments().getString(ARG_SCORE);
+            scoreView.setText(savedScore);
+            score = Integer.parseInt(savedScore);
         }
         else {
             score = 20;
@@ -136,9 +139,14 @@ public class ScoreFragment extends Fragment {
         scoreView.setText(Integer.toString(score));
     }
 
+    //Does this even work?
     @Override
     public void onStop(){
-        getArguments().putString(ARG_SCORE, Integer.toString(score));
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putString(ARG_SCORE, Integer.toString(score));
+        editor.commit();
+
+//        getArguments().putString(ARG_SCORE, Integer.toString(score));
         super.onStop();
     }
 
