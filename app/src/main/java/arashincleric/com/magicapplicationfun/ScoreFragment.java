@@ -107,14 +107,13 @@ public class ScoreFragment extends Fragment {
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 if (score <= 0) {
                     new AlertDialog.Builder(getActivity())
-                            .setTitle("End Game")
-                            .setMessage("Replay?")
+                            .setTitle(R.string.end_game_title)
+                            .setMessage(R.string.replay_game_message)
                             .setCancelable(false)
                             .setPositiveButton(R.string.replay_yes, new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialog, int which) {
-                                    score = 20;
-                                    scoreView.setText(Integer.toString(score));
+                                    resetScore();
                                 }
                             })
                             .setNegativeButton(R.string.replay_no, null).show();
@@ -126,6 +125,11 @@ public class ScoreFragment extends Fragment {
 
             }
         });
+    }
+
+    public void resetScore(){
+        score = 20;
+        scoreView.setText(Integer.toString(score));
     }
 
     private void decreaseScore() {

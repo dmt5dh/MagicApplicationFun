@@ -1,6 +1,8 @@
 package arashincleric.com.magicapplicationfun;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.support.v4.app.Fragment;
@@ -10,6 +12,7 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -18,7 +21,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
 
-public class MainActivity extends ActionBarActivity {
+public class MainActivity extends AppCompatActivity {
 
     private final String ARG_LIFE_COUNTER_FRAGMENT = "LifeCounter";
     private final String ARG_CARD_LOOKUP = "CardLookup";
@@ -27,6 +30,7 @@ public class MainActivity extends ActionBarActivity {
     private ActionBarDrawerToggle mDrawerToggle;
     private DrawerLayout mDrawerLayout;
     private Fragment mContent;
+    private Menu mOptionsMenu;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -85,6 +89,15 @@ public class MainActivity extends ActionBarActivity {
             //detach current attached fragment
             if(mContent != null){
                 transaction.detach(mContent);
+            }
+
+            //Show or hid new game buttons accordingly
+            switch(sel){
+                case ARG_LIFE_COUNTER_FRAGMENT:
+                    mOptionsMenu.findItem(R.id.new_game).setVisible(true);
+                    break;
+                default:
+                    mOptionsMenu.findItem(R.id.new_game).setVisible(false);
             }
 
             //Make new instance of fragment if not before
@@ -150,6 +163,7 @@ public class MainActivity extends ActionBarActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_main, menu);
+        mOptionsMenu = menu;
         return true;
     }
 
@@ -158,6 +172,7 @@ public class MainActivity extends ActionBarActivity {
     protected void onPostCreate(Bundle savedInstanceState){
         super.onPostCreate(savedInstanceState);
         mDrawerToggle.syncState();
+
     }
 
     //Sync state of nav drawer on config change
@@ -170,6 +185,13 @@ public class MainActivity extends ActionBarActivity {
     //Hide override settings
     @Override
     public boolean onPrepareOptionsMenu(Menu menu){
+        MenuItem item = menu.findItem(R.id.new_game);
+        ScoreFragment scoreFragment = (ScoreFragment)getSupportFragmentManager()
+                .findFragmentByTag(ARG_LIFE_COUNTER_FRAGMENT);
+        if(scoreFragment == null || !scoreFragment.isVisible()){
+            item.setVisible(false);
+        }
+
         return super.onPrepareOptionsMenu(menu);
     }
 
@@ -180,8 +202,22 @@ public class MainActivity extends ActionBarActivity {
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        if (id == R.id.new_game && mContent instanceof ScoreFragment) {
+        if (id == R.id.new_game) {
             //TODO: tell fragment to start new game; use interface listener
+            final ScoreFragment scoreFragment = (ScoreFragment)getSupportFragmentManager()
+                    .findFragmentByTag(ARG_LIFE_COUNTER_FRAGMENT);
+            if(scoreFragment != null){
+                //If the fragment was created
+                new AlertDialog.Builder(this)
+                        .setMessage(R.string.new_game_confirm)
+                        .setPositiveButton(R.string.replay_yes, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                scoreFragment.resetScore();
+                            }
+                        })
+                        .setNegativeButton(R.string.replay_no, null).show();
+            }
             return true;
         }
 
