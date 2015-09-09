@@ -25,6 +25,8 @@ public class MainActivity extends AppCompatActivity {
 
     private final String ARG_LIFE_COUNTER_FRAGMENT = "LifeCounter";
     private final String ARG_CARD_LOOKUP = "CardLookup";
+    private final String ARG_CARD_DECKLIST= "Decklist";
+    private static final String ARG_SCORE = "SCORE";
     private ListView mDrawerList;
 
     private ActionBarDrawerToggle mDrawerToggle;
@@ -47,34 +49,6 @@ public class MainActivity extends AppCompatActivity {
                 return;
             }
         }
-
-        addDrawerItems();
-        setupDrawer();
-
-        //Add hamburger icon on action bar
-        if(getSupportActionBar() != null){
-            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-            getSupportActionBar().setHomeButtonEnabled(true);
-        }
-
-        mDrawerList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                //TODO: Fragment logic here
-                switch(position){
-                    case 0:
-                        switchFragment(ARG_LIFE_COUNTER_FRAGMENT);
-                        break;
-                    case 1:
-                        switchFragment(ARG_CARD_LOOKUP);
-                        break;
-                    default:
-                        break;
-                }
-                mDrawerLayout.closeDrawers();
-            }
-        });
-
     }
 
     private void switchFragment(String sel){
@@ -104,13 +78,16 @@ public class MainActivity extends AppCompatActivity {
             if(fragment == null){
                 switch (sel) {
                     case ARG_LIFE_COUNTER_FRAGMENT:
-                        mContent = ScoreFragment.newInstance("20");
+                        mContent = ScoreFragment.newInstance();
                         break;
                     case ARG_CARD_LOOKUP:
                         mContent = CardLookupFragment.newInstance();
                         break;
+                    case ARG_CARD_DECKLIST:
+                        mContent = DeckListFragment.newInstance();
+                        break;
                     default:
-                        mContent = ScoreFragment.newInstance("20");
+                        mContent = ScoreFragment.newInstance();
                 }
             }
             else {
@@ -171,6 +148,46 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onPostCreate(Bundle savedInstanceState){
         super.onPostCreate(savedInstanceState);
+
+        ScoreFragment scoreFragment = (ScoreFragment)getSupportFragmentManager()
+                .findFragmentByTag(ARG_LIFE_COUNTER_FRAGMENT);
+
+        //Pull previously saved score
+        if(savedInstanceState != null && scoreFragment != null){
+            String savedScore = savedInstanceState.getString(ARG_SCORE, "20");
+            scoreFragment.setScoreView(savedScore);
+        }
+
+        //Set up navigation drawer here to handle configuration change
+        addDrawerItems();
+        setupDrawer();
+        //Add hamburger icon on action bar
+        if(getSupportActionBar() != null){
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            getSupportActionBar().setHomeButtonEnabled(true);
+        }
+
+        mDrawerList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                //TODO: Fragment logic here
+                switch (position) {
+                    case 0:
+                        switchFragment(ARG_LIFE_COUNTER_FRAGMENT);
+                        break;
+                    case 1:
+                        switchFragment(ARG_CARD_LOOKUP);
+                        break;
+                    case 2:
+                        switchFragment(ARG_CARD_DECKLIST);
+                        break;
+                    default:
+                        break;
+                }
+                mDrawerLayout.closeDrawers();
+            }
+        });
+
         mDrawerToggle.syncState();
 
     }
@@ -203,7 +220,6 @@ public class MainActivity extends AppCompatActivity {
         int id = item.getItemId();
 
         if (id == R.id.new_game) {
-            //TODO: tell fragment to start new game; use interface listener
             final ScoreFragment scoreFragment = (ScoreFragment)getSupportFragmentManager()
                     .findFragmentByTag(ARG_LIFE_COUNTER_FRAGMENT);
             if(scoreFragment != null){
@@ -235,5 +251,18 @@ public class MainActivity extends AppCompatActivity {
         SharedPreferences.Editor editor = sharedPrefs.edit();
         editor.clear();
         editor.commit();
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle savedInstanceState){
+        super.onSaveInstanceState(savedInstanceState);
+
+        ScoreFragment scoreFragment = (ScoreFragment)getSupportFragmentManager()
+                .findFragmentByTag(ARG_LIFE_COUNTER_FRAGMENT);
+        if(scoreFragment != null){
+            int scoreToSave = scoreFragment.getScore();
+
+            savedInstanceState.putString(ARG_SCORE, Integer.toString(scoreToSave));
+        }
     }
 }

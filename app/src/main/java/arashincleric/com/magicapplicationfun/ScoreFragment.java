@@ -34,12 +34,10 @@ public class ScoreFragment extends Fragment {
     /**
      * Use this factory method to create a new instance of
      * this fragment using the provided parameters.
-     *
-     * @param scoreParam Score Parameter.
      * @return A new instance of fragment ScoreFragment.
      */
     // TODO: Rename and change types and number of parameters
-    public static ScoreFragment newInstance(String scoreParam) {
+    public static ScoreFragment newInstance() {
         ScoreFragment fragment = new ScoreFragment();
         Bundle args = new Bundle();
         fragment.setArguments(args);
@@ -85,17 +83,10 @@ public class ScoreFragment extends Fragment {
 
         scoreView = (TextView)view.findViewById(R.id.scoreView);
 
-        String savedScore = sharedPreferences.getString(ARG_SCORE, null);
-
-        if(savedScore != null){
-//            String mScore = getArguments().getString(ARG_SCORE);
-            scoreView.setText(savedScore);
-            score = Integer.parseInt(savedScore);
-        }
-        else {
-            score = 20;
-            scoreView.setText("20");
-        }
+        //Stupid workaround for now; this is called when first made and when config change
+        //MainActivity will called this with a saved instance of the score if config change
+        //so essentially this is called twice during config change...
+        setScoreView(null);
 
         scoreView.addTextChangedListener(new TextWatcher() {
             @Override
@@ -144,6 +135,10 @@ public class ScoreFragment extends Fragment {
         scoreView.setText(Integer.toString(score));
     }
 
+    public int getScore(){
+        return score;
+    }
+
     //Does this even work?
     @Override
     public void onStop(){
@@ -153,6 +148,17 @@ public class ScoreFragment extends Fragment {
 
 //        getArguments().putString(ARG_SCORE, Integer.toString(score));
         super.onStop();
+    }
+
+    public void setScoreView(String savedScore){
+        if(savedScore != null){
+            scoreView.setText(savedScore);
+            score = Integer.parseInt(savedScore);
+        }
+        else {
+            score = 20;
+            scoreView.setText("20");
+        }
     }
 
 
