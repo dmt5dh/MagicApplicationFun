@@ -109,6 +109,7 @@ public class ScoreFragment extends Fragment {
                     new AlertDialog.Builder(getActivity())
                             .setTitle("End Game")
                             .setMessage("Replay?")
+                            .setCancelable(false)
                             .setPositiveButton(R.string.replay_yes, new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialog, int which) {
@@ -149,5 +150,7 @@ public class ScoreFragment extends Fragment {
 //        getArguments().putString(ARG_SCORE, Integer.toString(score));
         super.onStop();
     }
+
+
 
 }

@@ -170,7 +170,6 @@ public class MainActivity extends ActionBarActivity {
     //Hide override settings
     @Override
     public boolean onPrepareOptionsMenu(Menu menu){
-        menu.findItem(R.id.action_settings).setVisible(false);
         return super.onPrepareOptionsMenu(menu);
     }
 
@@ -181,8 +180,8 @@ public class MainActivity extends ActionBarActivity {
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
+        if (id == R.id.new_game && mContent instanceof ScoreFragment) {
+            //TODO: tell fragment to start new game; use interface listener
             return true;
         }
 
