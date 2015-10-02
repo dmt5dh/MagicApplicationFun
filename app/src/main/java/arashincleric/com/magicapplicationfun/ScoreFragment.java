@@ -82,10 +82,9 @@ public class ScoreFragment extends Fragment {
 
         scoreView = (TextView)view.findViewById(R.id.scoreView);
 
-        //Stupid workaround for now; this is called when first made and when config change
-        //MainActivity will called this with a saved instance of the score if config change
-        //so essentially this is called twice during config change...
-        setScoreView(null);
+        if(sharedPreferences != null){
+            setScoreView(sharedPreferences.getString(ARG_SCORE, "20"));
+        }
 
         scoreView.addTextChangedListener(new TextWatcher() {
             @Override

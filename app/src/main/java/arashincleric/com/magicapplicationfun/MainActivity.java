@@ -26,8 +26,10 @@ public class MainActivity extends AppCompatActivity {
     private final String ARG_LIFE_COUNTER_FRAGMENT = "LifeCounter";
     private final String ARG_CARD_LOOKUP = "CardLookup";
     private final String ARG_CARD_DECKLIST= "Decklist";
+    private final String ARG_CURRENT_FRAGMENT= "CurrentFragment";
     private static final String ARG_SCORE = "SCORE";
     private ListView mDrawerList;
+    private String curFragName;
 
     private ActionBarDrawerToggle mDrawerToggle;
     private DrawerLayout mDrawerLayout;
@@ -102,6 +104,7 @@ public class MainActivity extends AppCompatActivity {
 
             transaction.commit();
         }
+        curFragName = sel;
     }
 
     private void setupDrawer() {
@@ -153,9 +156,17 @@ public class MainActivity extends AppCompatActivity {
                 .findFragmentByTag(ARG_LIFE_COUNTER_FRAGMENT);
 
         //Pull previously saved score
-        if(savedInstanceState != null && scoreFragment != null){
-            String savedScore = savedInstanceState.getString(ARG_SCORE, "20");
-            scoreFragment.setScoreView(savedScore);
+        if(savedInstanceState != null){
+            curFragName = savedInstanceState.getString(ARG_CURRENT_FRAGMENT, null);
+
+            if(curFragName != null){
+                mContent = getSupportFragmentManager().findFragmentByTag(curFragName);
+            }
+
+            if(scoreFragment != null){
+                String savedScore = savedInstanceState.getString(ARG_SCORE, "20");
+                scoreFragment.setScoreView(savedScore);
+            }
         }
 
         //Set up navigation drawer here to handle configuration change
@@ -252,6 +263,7 @@ public class MainActivity extends AppCompatActivity {
         editor.commit();
     }
 
+    //Save the score on config change
     @Override
     public void onSaveInstanceState(Bundle savedInstanceState){
         super.onSaveInstanceState(savedInstanceState);
@@ -262,6 +274,10 @@ public class MainActivity extends AppCompatActivity {
             int scoreToSave = scoreFragment.getScore();
 
             savedInstanceState.putString(ARG_SCORE, Integer.toString(scoreToSave));
+        }
+
+        if(mContent != null){
+            savedInstanceState.putString(ARG_CURRENT_FRAGMENT, curFragName);
         }
     }
 }
