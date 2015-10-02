@@ -20,7 +20,6 @@ public class DeckListFragment extends Fragment {
      * Use this factory method to create a new instance of
      * this fragment using the provided parameters.
      */
-    // TODO: Rename and change types and number of parameters
     public static DeckListFragment newInstance() {
         DeckListFragment fragment = new DeckListFragment();
         Bundle args = new Bundle();

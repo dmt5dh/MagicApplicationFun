@@ -36,7 +36,6 @@ public class ScoreFragment extends Fragment {
      * this fragment using the provided parameters.
      * @return A new instance of fragment ScoreFragment.
      */
-    // TODO: Rename and change types and number of parameters
     public static ScoreFragment newInstance() {
         ScoreFragment fragment = new ScoreFragment();
         Bundle args = new Bundle();

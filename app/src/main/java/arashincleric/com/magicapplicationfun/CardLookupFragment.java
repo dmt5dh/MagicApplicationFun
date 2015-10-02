@@ -22,7 +22,6 @@ public class CardLookupFragment extends Fragment {
      * this fragment using the provided parameters.
      * @return A new instance of fragment CardLookupFragment.
      */
-    // TODO: Rename and change types and number of parameters
     public static CardLookupFragment newInstance() {
         CardLookupFragment fragment = new CardLookupFragment();
         Bundle args = new Bundle();

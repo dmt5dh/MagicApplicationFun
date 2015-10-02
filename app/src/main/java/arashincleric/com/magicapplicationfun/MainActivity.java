@@ -170,7 +170,6 @@ public class MainActivity extends AppCompatActivity {
         mDrawerList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                //TODO: Fragment logic here
                 switch (position) {
                     case 0:
                         switchFragment(ARG_LIFE_COUNTER_FRAGMENT);
