@@ -76,6 +76,12 @@ public class MainActivity extends AppCompatActivity {
                     mOptionsMenu.findItem(R.id.new_game).setVisible(false);
             }
 
+            if(sel.equals(ARG_CARD_LOOKUP)){
+                mOptionsMenu.findItem(R.id.search).setVisible(true);
+            } else {
+                mOptionsMenu.findItem(R.id.search).setVisible(false);
+            }
+
             //Make new instance of fragment if not before
             if(fragment == null){
                 switch (sel) {

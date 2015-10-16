@@ -2,9 +2,68 @@
     xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context="arashincleric.com.magicapplicationfun.CardLookupFragment">
+    <!--<TableLayout-->
+        <!--android:layout_width="fill_parent"-->
+        <!--android:layout_height="fill_parent"-->
+        <!--android:stretchColumns="1">-->
+        <!--<TableRow>-->
+            <!--<EditText-->
+                <!--android:layout_width="wrap_content"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:id="@+id/searchText"-->
+                <!--android:layout_gravity="center_horizontal|top"-->
+                <!--android:hint="Search Card"/>-->
+        <!--</TableRow>-->
 
-    <!-- TODO: Update blank fragment layout -->
-    <TextView android:layout_width="match_parent" android:layout_height="match_parent"
-        android:text="@string/hello_blank_fragment" />
+        <!--<TableRow>-->
+            <!--<Button-->
+                <!--android:layout_width="wrap_content"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:text="New Button"-->
+                <!--android:id="@+id/button"-->
+                <!--android:layout_gravity="center" />-->
+        <!--</TableRow>-->
+
+        <!--<TableRow>-->
+            <!--<ScrollView-->
+                <!--android:layout_width="fill_parent"-->
+                <!--android:layout_height="fill_parent">-->
+                <!--<TextView-->
+                    <!--android:layout_width="wrap_content"-->
+                    <!--android:layout_height="wrap_content"-->
+                    <!--android:text="New Text"-->
+                    <!--android:id="@+id/textView"-->
+                    <!--android:layout_gravity="center_horizontal|bottom" />-->
+            <!--</ScrollView>-->
+        <!--</TableRow>-->
+
+    <!--</TableLayout>-->
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="New Button"
+        android:id="@+id/button"
+        android:layout_gravity="right|bottom" />
+
+    <EditText
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/searchText"
+        android:layout_gravity="center_horizontal|bottom"
+        android:hint="Search Card"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="New Text"
+        android:id="@+id/textView"
+        android:layout_gravity="left|top" />
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/imageView"
+        android:layout_gravity="left|center_vertical" />
 
 </FrameLayout>

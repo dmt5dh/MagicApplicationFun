@@ -4,4 +4,10 @@
     <item android:id="@+id/new_game"
         android:title="@string/new_game"
         app:showAsAction="always" />
+
+    <item android:id="@+id/search"
+        android:title="@string/search_title"
+        android:icon="@drawable/ic_search"
+        app:showAsAction="collapseActionView|ifRoom"
+        android:actionViewClass="android.widget.SearchView" />
 </menu>
