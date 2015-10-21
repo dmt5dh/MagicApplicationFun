@@ -7,6 +7,7 @@ import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -90,7 +91,7 @@ public class CardLookupFragment extends Fragment {
         submitBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                testConnection();
+                testConnection(null);
             }
         });
     }
@@ -124,9 +125,13 @@ public class CardLookupFragment extends Fragment {
         Toast.makeText(getActivity(),text, Toast.LENGTH_SHORT).show();
     }
 
-    public void testConnection(){
+    public void testConnection(@Nullable String q){
 
-        String query = searchText.getText().toString().toLowerCase().replaceAll(" ", "-");
+//        String query = searchText.getText().toString().toLowerCase().replaceAll(" ", "-");
+        if(q.equals(null)){
+            return;
+        }
+        String query = q.toLowerCase().replaceAll(" ", "-");
         String url = "https://api.deckbrew.com/mtg/cards/" + query;
         ConnectivityManager connMgr = (ConnectivityManager)
                 getActivity().getSystemService(getActivity().CONNECTIVITY_SERVICE);

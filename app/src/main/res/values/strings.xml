@@ -17,6 +17,7 @@
     <string name="replay_game_message">Replay?</string>
     <string name="new_game_confirm">Start a new game?</string>
     <string name="search_title">Search card</string>
+    <string name="search_hint">Search card name</string>
 
 <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>

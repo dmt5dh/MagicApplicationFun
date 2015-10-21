@@ -1,6 +1,7 @@
 package arashincleric.com.magicapplicationfun;
 
 import android.app.AlertDialog;
+import android.app.SearchManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
@@ -9,10 +10,10 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.SearchView;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -36,6 +37,8 @@ public class MainActivity extends AppCompatActivity {
     private Fragment mContent;
     private Menu mOptionsMenu;
 
+    SearchView searchView;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -43,7 +46,8 @@ public class MainActivity extends AppCompatActivity {
 
         mDrawerList = (ListView)findViewById(R.id.navList);
         mDrawerLayout = (DrawerLayout)findViewById(R.id.drawer_layout);
-        setTitle(R.string.application_title);
+//        setTitle(R.string.application_title);
+        setTitle("");
 
         //If something already present
         if(findViewById(R.id.fragment_container) != null) {
@@ -65,21 +69,6 @@ public class MainActivity extends AppCompatActivity {
             //detach current attached fragment
             if(mContent != null){
                 transaction.detach(mContent);
-            }
-
-            //Show or hid new game buttons accordingly
-            switch(sel){
-                case ARG_LIFE_COUNTER_FRAGMENT:
-                    mOptionsMenu.findItem(R.id.new_game).setVisible(true);
-                    break;
-                default:
-                    mOptionsMenu.findItem(R.id.new_game).setVisible(false);
-            }
-
-            if(sel.equals(ARG_CARD_LOOKUP)){
-                mOptionsMenu.findItem(R.id.search).setVisible(true);
-            } else {
-                mOptionsMenu.findItem(R.id.search).setVisible(false);
             }
 
             //Make new instance of fragment if not before
@@ -114,6 +103,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setupDrawer() {
+        //Setup the actions to take when opening/closing nav drawer
         mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout,
                 R.string.drawer_open, R.string.drawer_close) {
             /** Called when drawer has settled completely open **/
@@ -140,6 +130,7 @@ public class MainActivity extends AppCompatActivity {
         mDrawerLayout.setDrawerListener(mDrawerToggle);
     }
 
+    //Associate the data to the listview in nav drawer
     private void addDrawerItems(){
         String[] navListArray = {"Life Counter", "Card Lookup", "Decklist"};
         ArrayAdapter<String> mAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, navListArray);
@@ -150,6 +141,33 @@ public class MainActivity extends AppCompatActivity {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_main, menu);
         mOptionsMenu = menu;
+
+        // Associate searchable configuration with the SearchView
+        SearchManager searchManager =
+                (SearchManager) getSystemService(Context.SEARCH_SERVICE);
+        searchView =
+                (SearchView) menu.findItem(R.id.search).getActionView();
+        searchView.setSearchableInfo(
+                searchManager.getSearchableInfo(getComponentName()));
+
+        //Sends search query to search fragment
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                //TODO: Send to cardlookup fragment
+                //TODO: clean this up
+                CardLookupFragment c = (CardLookupFragment)mContent;
+                c.testConnection(query);
+                return true; //Set to true so we don't fire off intent
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                //TODO: Implement autocomplete when possible
+                return true;
+            }
+        });
+
         return true;
     }
 
@@ -218,11 +236,20 @@ public class MainActivity extends AppCompatActivity {
     //Hide override settings
     @Override
     public boolean onPrepareOptionsMenu(Menu menu){
-        MenuItem item = menu.findItem(R.id.new_game);
-        ScoreFragment scoreFragment = (ScoreFragment)getSupportFragmentManager()
-                .findFragmentByTag(ARG_LIFE_COUNTER_FRAGMENT);
-        if(scoreFragment == null || !scoreFragment.isVisible()){
-            item.setVisible(false);
+        //Clear the options menu
+        for(int i = 0; i < menu.size(); i++){
+            menu.getItem(i).setVisible(false);
+        }
+        //Set the menu items according to fragment chosen
+        if(mContent != null){
+            switch(curFragName){
+                case ARG_LIFE_COUNTER_FRAGMENT:
+                    menu.findItem(R.id.new_game).setVisible(true);
+                    break;
+                case ARG_CARD_LOOKUP:
+                    menu.findItem(R.id.search).setVisible(true);
+                    break;
+            }
         }
 
         return super.onPrepareOptionsMenu(menu);
@@ -235,6 +262,7 @@ public class MainActivity extends AppCompatActivity {
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
+        //Show an alert when user wnats to play a new game
         if (id == R.id.new_game) {
             final ScoreFragment scoreFragment = (ScoreFragment)getSupportFragmentManager()
                     .findFragmentByTag(ARG_LIFE_COUNTER_FRAGMENT);
@@ -263,6 +291,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onStop(){
         super.onStop();
+        //Clear the score if user quits app
         SharedPreferences sharedPrefs = getPreferences(Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPrefs.edit();
         editor.clear();
