@@ -6,25 +6,18 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -32,7 +25,6 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.URL;
 
 
@@ -44,11 +36,9 @@ import java.net.URL;
 public class CardLookupFragment extends Fragment {
 
 
-    private EditText searchText;
-    private Handler handler = new Handler();
-    private Button submitBtn;
     private ImageView cardImage;
     private TextView textView;
+    private String currentQuery;
 
     /**
      * Use this factory method to create a new instance of
@@ -80,59 +70,19 @@ public class CardLookupFragment extends Fragment {
 
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState){
-        searchText = (EditText)view.findViewById(R.id.searchText);
-        searchText.addTextChangedListener(textWatcher);
 
-        cardImage = (ImageView)view.findViewById(R.id.imageView);
+        cardImage = (ImageView)view.findViewById(R.id.cardImage);
 
-        textView = (TextView)view.findViewById(R.id.textView);
-
-        submitBtn = (Button)view.findViewById(R.id.button);
-        submitBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                testConnection(null);
-            }
-        });
-    }
-
-    private TextWatcher textWatcher = new TextWatcher() {
-        @Override
-        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
-        }
-
-        @Override
-        public void onTextChanged(CharSequence s, int start, int before, int count) {
-            handler.removeCallbacks(runnable);
-        }
-
-        @Override
-        public void afterTextChanged(Editable s) {
-
-//            handler.postDelayed(runnable, 300);
-        }
-    };
-
-    private Runnable runnable = new Runnable() {
-        @Override
-        public void run() {
-            getTypeAhead(searchText.getText().toString());
-        }
-    };
-
-    public void getTypeAhead(String text){
-        Toast.makeText(getActivity(),text, Toast.LENGTH_SHORT).show();
+        textView = (TextView)view.findViewById(R.id.cardInfo);
     }
 
     public void testConnection(@Nullable String q){
-
-//        String query = searchText.getText().toString().toLowerCase().replaceAll(" ", "-");
-        if(q.equals(null)){
+        if(q == null){
             return;
         }
-        String query = q.toLowerCase().replaceAll(" ", "-");
-        String url = "https://api.deckbrew.com/mtg/cards/" + query;
+        //get rid of spaces
+        currentQuery = q.toLowerCase().trim().replaceAll("\\s+", "-");
+        String url = "https://api.deckbrew.com/mtg/cards/" + currentQuery;
         ConnectivityManager connMgr = (ConnectivityManager)
                 getActivity().getSystemService(getActivity().CONNECTIVITY_SERVICE);
         NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
@@ -140,10 +90,11 @@ public class CardLookupFragment extends Fragment {
             new DownloadWebpageTask().execute(url);
         }
         else{
-            Toast.makeText(getActivity(),"not connected", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getActivity(),"No connection", Toast.LENGTH_LONG).show();
         }
     }
 
+    //Async task to lookup a card
     private class DownloadWebpageTask extends AsyncTask<String,Void,String> {
         @Override
         protected String doInBackground(String... urls){
@@ -151,18 +102,60 @@ public class CardLookupFragment extends Fragment {
                 return downloadUrl(urls[0]);
             }
             catch (IOException e){
-                return "unable to retrieve webpage";
+                Log.i("CARDLOOKUP", "Blank response, checking suggestions");
+                return "";
             }
         }
 
         @Override
         protected void onPostExecute(String results){
 
-            printStats(results);
-            new DownloadImage().execute(results);
+            //If empty there was an incomplete search so try to find suggestions
+            if(results.isEmpty()){
+                String url = "https://api.deckbrew.com/mtg/cards/typeahead?q=" + currentQuery;
+                cardImage.setImageResource(0); //Clear image if present
+                new DownloadSuggestionTask().execute(url);
+            }
+            else{ //Otherwise just print the stats
+                printStats(results);
+                new DownloadImage().execute(results);
+            }
+
         }
     }
 
+    //Async task to check suggestions
+    private class DownloadSuggestionTask extends AsyncTask<String, Void, String> {
+        @Override
+        protected String doInBackground(String... urls) {
+            try{
+                return downloadUrl(urls[0]);
+            }
+            catch(IOException e){
+                Log.i("CARDLOOKUP", "Blank response for suggestions");
+                return "";
+            }
+        }
+
+        @Override
+        protected void onPostExecute(String results){
+            JSONArray jsonArray;
+            try{
+                jsonArray = new JSONArray(results);
+                StringBuilder suggestions = new StringBuilder("Did you mean: \n");
+                for(int i = 0; i < jsonArray.length(); i++){
+                    suggestions.append('\t' + jsonArray.getJSONObject(i).getString("name") + '\n');
+                }
+                textView.setText(suggestions);
+            }
+            catch(JSONException e){
+                Log.e("CARDLOOKUP", "JSON NOT PARSED(Suggestions)");
+            }
+
+        }
+    }
+
+    //Async task to get card image
     private class DownloadImage extends AsyncTask<String, Void, Bitmap> {
         @Override
         protected Bitmap doInBackground(String... urls){
@@ -187,7 +180,6 @@ public class CardLookupFragment extends Fragment {
 
     private String downloadUrl(String myurl) throws IOException{
         InputStream is = null;
-        int len = 500;
         try{
             URL url = new URL(myurl);
             HttpURLConnection conn = (HttpURLConnection)url.openConnection();
@@ -198,10 +190,10 @@ public class CardLookupFragment extends Fragment {
 
             conn.connect();
             int response = conn.getResponseCode();
+            Log.i("URL", "Response: " + response);
             is = conn.getInputStream();
 
-            String contentString = readIt(is,len);
-            return contentString;
+            return readIt(is);
         } finally {
             if (is != null){
                 is.close();
@@ -209,38 +201,37 @@ public class CardLookupFragment extends Fragment {
         }
     }
 
-    public String readIt(InputStream is, int len)throws IOException, UnsupportedEncodingException {
-        Reader reader = null;
+    public String readIt(InputStream is)throws IOException {
+        Reader reader;
         reader = new InputStreamReader(is, "UTF-8");
         BufferedReader bufferedReader = new BufferedReader(reader);
         StringBuilder stringBuilder = new StringBuilder();
-        String line = null;
+        String line;
 
         while((line = bufferedReader.readLine()) != null){
-            stringBuilder.append(line + '\n');
+            stringBuilder.append(line);
         }
 
         return stringBuilder.toString();
     }
 
     public void printStats(String results){
-//        textView.setText(results);
         JSONObject stats;
         try{
             stats = new JSONObject(results);
-            Log.e("JSON", stats.toString(8));
+            //TODO: specify what info to print and remove brackets in some values
             String name = stats.getString("name") + '\n';
             String types = stats.getString("types") + '\n';
-            String supertypes = stats.getString("subtypes") + '\n';
+            String subtypes = stats.getString("subtypes") + '\n';
             JSONArray sets = stats.getJSONArray("editions");
             StringBuilder setList = new StringBuilder();
             for(int i = 0; i < sets.length(); i++){
                 setList.append(sets.getJSONObject(i).getString("set"));
             }
 
-            textView.setText(name + types + supertypes + setList.toString());
+            textView.setText(name + types + subtypes + setList.toString());
         } catch (JSONException e){
-            Log.e("ERROR", "JSON NOT PARSED");
+            Log.e("CARDLOOKUP", "JSON NOT PARSED(PrintStats)");
         }
 
     }
@@ -250,6 +241,7 @@ public class CardLookupFragment extends Fragment {
         stats = new JSONObject(results);
         JSONArray sets = stats.getJSONArray("editions");
         String imageURL = null;
+        //Loop until we can find an actual image (ie Prerelease cards have no image)
         for(int i = 0; i < sets.length(); i++){
             imageURL = sets.getJSONObject(i).getString("image_url");
             if(!sets.getJSONObject(i).getString("set").equals("Prerelease Events")){
@@ -258,9 +250,7 @@ public class CardLookupFragment extends Fragment {
         }
 
         URL image = new URL(imageURL);
-        Log.e("IMAGE", imageURL);
-        Bitmap bmp = BitmapFactory.decodeStream(image.openConnection().getInputStream());
-        return bmp;
+        return BitmapFactory.decodeStream(image.openConnection().getInputStream());
     }
 
 }

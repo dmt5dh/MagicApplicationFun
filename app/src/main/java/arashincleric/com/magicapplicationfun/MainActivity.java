@@ -46,10 +46,10 @@ public class MainActivity extends AppCompatActivity {
 
         mDrawerList = (ListView)findViewById(R.id.navList);
         mDrawerLayout = (DrawerLayout)findViewById(R.id.drawer_layout);
-//        setTitle(R.string.application_title);
-        setTitle("");
+        setTitle(R.string.application_title);
 
         //If something already present
+        //TODO: why is this here?
         if(findViewById(R.id.fragment_container) != null) {
             if(savedInstanceState != null){
                 return;
@@ -155,9 +155,13 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public boolean onQueryTextSubmit(String query) {
                 //TODO: Send to cardlookup fragment
-                //TODO: clean this up
-                CardLookupFragment c = (CardLookupFragment)mContent;
-                c.testConnection(query);
+                if(curFragName.equals(ARG_CARD_LOOKUP)){
+                    CardLookupFragment c = (CardLookupFragment)mContent;
+                    c.testConnection(query);
+                }
+//
+                //Close searchview afterwards
+                mOptionsMenu.findItem(R.id.search).collapseActionView();
                 return true; //Set to true so we don't fire off intent
             }
 
