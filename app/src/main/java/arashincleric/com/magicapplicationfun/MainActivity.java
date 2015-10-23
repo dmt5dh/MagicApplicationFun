@@ -9,6 +9,7 @@ import android.content.res.Configuration;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.view.MenuItemCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -20,6 +21,8 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+
+import java.util.ArrayList;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -36,6 +39,8 @@ public class MainActivity extends AppCompatActivity {
     private DrawerLayout mDrawerLayout;
     private Fragment mContent;
     private Menu mOptionsMenu;
+
+    private ArrayList<Fragment> fragmentStack = new ArrayList<Fragment>();
 
     SearchView searchView;
 
@@ -55,6 +60,34 @@ public class MainActivity extends AppCompatActivity {
                 return;
             }
         }
+    }
+
+    //Override the back logic to support back button for fragments
+    @Override
+    public void onBackPressed(){
+        if (fragmentStack.size() == 1){
+            finish();
+        }
+        else if (fragmentStack.size() > 1) {
+            FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+            transaction.detach(mContent);
+            fragmentStack.remove(fragmentStack.size() - 1);
+            mContent = fragmentStack.get(fragmentStack.size() - 1);
+            transaction.attach(mContent);
+            transaction.commit();
+            curFragName = mContent.getTag();
+            onPrepareOptionsMenu(mOptionsMenu);
+        }
+        else { //Why is this here? idk just in case...
+            super.onBackPressed();
+        }
+    }
+
+    private Fragment getCurrentFragment(){
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        String fragmentName = fragmentManager
+                .getBackStackEntryAt(fragmentManager.getBackStackEntryCount() - 1).getName();
+        return fragmentManager.findFragmentByTag(fragmentName);
     }
 
     private void switchFragment(String sel){
@@ -86,9 +119,19 @@ public class MainActivity extends AppCompatActivity {
                     default:
                         mContent = ScoreFragment.newInstance();
                 }
+//                transaction.addToBackStack(sel);
+                fragmentStack.add(mContent);
             }
             else {
                 mContent = fragment;
+                if(fragmentStack.size() == 3) { //Get the fragment and put on top of stack but retain rest of stack
+                    fragmentStack.remove(fragmentStack.indexOf(mContent));
+                    fragmentStack.add(2, mContent);
+
+                }
+                else{
+                    fragmentStack.add(mContent);
+                }
             }
             if(mContent.isAdded() || mContent.isDetached()) {
                 transaction.attach(mContent);
@@ -169,6 +212,17 @@ public class MainActivity extends AppCompatActivity {
             public boolean onQueryTextChange(String newText) {
                 //TODO: Implement autocomplete when possible
                 return true;
+            }
+        });
+
+        //Back button press for searchView
+        searchView.setOnQueryTextFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if(!hasFocus) {
+                    mOptionsMenu.findItem(R.id.search).collapseActionView();
+                    searchView.setQuery("", false);
+                }
             }
         });
 
@@ -255,7 +309,7 @@ public class MainActivity extends AppCompatActivity {
                     break;
             }
         }
-
+        invalidateOptionsMenu();
         return super.onPrepareOptionsMenu(menu);
     }
 
