@@ -19,6 +19,7 @@
     <string name="search_title">Search card</string>
     <string name="search_hint">Search card name</string>
     <string name="search_intro">Use search bar above to look up a card</string>
+    <string name="add_deck">Add deck</string>
 
 <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>

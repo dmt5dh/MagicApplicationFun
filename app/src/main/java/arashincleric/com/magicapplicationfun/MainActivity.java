@@ -20,6 +20,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.EditText;
 import android.widget.ListView;
 
 import java.util.ArrayList;
@@ -307,6 +308,9 @@ public class MainActivity extends AppCompatActivity {
                 case ARG_CARD_LOOKUP:
                     menu.findItem(R.id.search).setVisible(true);
                     break;
+                case ARG_CARD_DECKLIST:
+                    menu.findItem(R.id.new_deck).setVisible(true);
+                    break;
             }
         }
         invalidateOptionsMenu();
@@ -337,6 +341,24 @@ public class MainActivity extends AppCompatActivity {
                         .setNegativeButton(R.string.replay_no, null).show();
             }
             return true;
+        }
+        else if(id == R.id.new_deck) {
+
+            //TODO:CHECK THIS!
+            final DeckListFragment deckListFragment = (DeckListFragment)getSupportFragmentManager()
+                    .findFragmentByTag(ARG_CARD_DECKLIST);
+            final EditText input = new EditText(this);
+            input.setHint("Deck name");
+            new AlertDialog.Builder(this)
+                    .setMessage("Add a new deck?")
+                    .setPositiveButton("Create", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            deckListFragment.addDeck(input.getText().toString());
+                        }
+                    })
+                    .setNegativeButton("Cancel",null).show();
+
         }
 
         if (mDrawerToggle.onOptionsItemSelected(item)) {
