@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
+import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
@@ -20,8 +21,12 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.Toast;
+
+import org.json.JSONArray;
 
 import java.util.ArrayList;
 
@@ -43,7 +48,16 @@ public class MainActivity extends AppCompatActivity {
 
     private ArrayList<Fragment> fragmentStack = new ArrayList<Fragment>();
 
-    SearchView searchView;
+    private SearchView searchView;
+
+    private Handler handler = new Handler();
+    private Runnable runnable = new Runnable() {
+        @Override
+        public void run() {
+            CardLookupFragment c = (CardLookupFragment)mContent;
+            c.getAutoComplete(searchView.getQuery().toString());
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -199,10 +213,10 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public boolean onQueryTextSubmit(String query) {
                 //TODO: Send to cardlookup fragment
-                if(curFragName.equals(ARG_CARD_LOOKUP)){
-                    CardLookupFragment c = (CardLookupFragment)mContent;
-                    c.testConnection(query);
-                }
+//                if (curFragName.equals(ARG_CARD_LOOKUP)) {
+//                    CardLookupFragment c = (CardLookupFragment) mContent;
+////                    c.testConnection(query);
+//                }
 //
                 //Close searchview afterwards
                 mOptionsMenu.findItem(R.id.search).collapseActionView();
@@ -212,6 +226,11 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public boolean onQueryTextChange(String newText) {
                 //TODO: Implement autocomplete when possible
+                if(!newText.isEmpty()){
+                    handler.removeCallbacks(runnable);
+                    handler.postDelayed(runnable, 100);
+                }
+
                 return true;
             }
         });
@@ -220,7 +239,7 @@ public class MainActivity extends AppCompatActivity {
         searchView.setOnQueryTextFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
-                if(!hasFocus) {
+                if (!hasFocus) {
                     mOptionsMenu.findItem(R.id.search).collapseActionView();
                     searchView.setQuery("", false);
                 }
@@ -357,7 +376,9 @@ public class MainActivity extends AppCompatActivity {
                             deckListFragment.addDeck(input.getText().toString());
                         }
                     })
-                    .setNegativeButton("Cancel",null).show();
+                    .setNegativeButton("Cancel",null)
+                    .setView(input)
+                    .show();
 
         }
 

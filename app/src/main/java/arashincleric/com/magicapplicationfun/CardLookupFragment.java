@@ -8,11 +8,14 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.ListFragment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
 import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 import org.json.JSONArray;
@@ -26,6 +29,7 @@ import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.ArrayList;
 
 
 /**
@@ -33,12 +37,13 @@ import java.net.URL;
  * Use the {@link CardLookupFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class CardLookupFragment extends Fragment {
+public class CardLookupFragment extends ListFragment {
 
 
     private ImageView cardImage;
     private TextView textView;
     private String currentQuery;
+    private ArrayAdapter<String> adapter;
 
     /**
      * Use this factory method to create a new instance of
@@ -64,6 +69,9 @@ public class CardLookupFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+
+        adapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_list_item_1);
+        setListAdapter(adapter);
         // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_card_lookup, container, false);
     }
@@ -74,6 +82,24 @@ public class CardLookupFragment extends Fragment {
         cardImage = (ImageView)view.findViewById(R.id.cardImage);
 
         textView = (TextView)view.findViewById(R.id.cardInfo);
+    }
+
+    public void getAutoComplete(String query){
+        String url = "https://api.deckbrew.com/mtg/cards/typeahead?q=" + query;
+        cardImage.setVisibility(View.GONE); //Clear image if present
+        textView.setVisibility(View.GONE);
+        getListView().setVisibility(View.VISIBLE);
+        new DownloadSuggestionTask().execute(url);
+
+    }
+
+    @Override
+    public void onListItemClick(ListView l, View v, int pos, long id){
+        //TODO: click to view whole list
+        String query = (String)l.getItemAtPosition(pos);
+        testConnection(query);
+        l.setVisibility(View.GONE);
+
     }
 
     public void testConnection(@Nullable String q){
@@ -119,6 +145,8 @@ public class CardLookupFragment extends Fragment {
             else{ //Otherwise just print the stats
                 printStats(results);
                 new DownloadImage().execute(results);
+                cardImage.setVisibility(View.VISIBLE);
+                textView.setVisibility(View.VISIBLE);
             }
 
         }
@@ -139,14 +167,24 @@ public class CardLookupFragment extends Fragment {
 
         @Override
         protected void onPostExecute(String results){
+            String s = results;
             JSONArray jsonArray;
             try{
                 jsonArray = new JSONArray(results);
-                StringBuilder suggestions = new StringBuilder("Did you mean: \n");
+                ArrayList<String> nameList = new ArrayList<String>();
+
+//                StringBuilder suggestions = new StringBuilder("Did you mean: \n");
                 for(int i = 0; i < jsonArray.length(); i++){
-                    suggestions.append('\t' + jsonArray.getJSONObject(i).getString("name") + '\n');
+//                    suggestions.append('\t' + jsonArray.getJSONObject(i).getString("name") + '\n');
+                    nameList.add(jsonArray.getJSONObject(i).getString("name"));
                 }
-                textView.setText(suggestions);
+                adapter.clear();
+                adapter.addAll(nameList);
+                adapter.notifyDataSetChanged();
+                getListView().invalidateViews();
+                getListView().refreshDrawableState();
+
+//                textView.setText(suggestions);
             }
             catch(JSONException e){
                 Log.e("CARDLOOKUP", "JSON NOT PARSED(Suggestions)");
