@@ -1,5 +1,6 @@
 package arashincleric.com.magicapplicationfun;
 
+import android.app.Activity;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.ConnectivityManager;
@@ -44,6 +45,12 @@ public class CardLookupFragment extends ListFragment {
     private TextView textView;
     private String currentQuery;
     private ArrayAdapter<String> adapter;
+    private OnSearchSelectedListener mCallback;
+
+    //Tell activity to clean up search bar when something chosen
+    public interface OnSearchSelectedListener {
+        public void itemSelected();
+    }
 
     /**
      * Use this factory method to create a new instance of
@@ -99,7 +106,19 @@ public class CardLookupFragment extends ListFragment {
         String query = (String)l.getItemAtPosition(pos);
         testConnection(query);
         l.setVisibility(View.GONE);
+        mCallback.itemSelected();
 
+    }
+
+    @Override
+    public void onAttach(Activity activity){
+        super.onAttach(activity);
+        try{
+            mCallback = (OnSearchSelectedListener) activity;
+        } catch (ClassCastException e){
+            throw new ClassCastException(activity.toString()
+                    + " must imlement OnSearchSelectedListener");
+        }
     }
 
     public void testConnection(@Nullable String q){
@@ -107,7 +126,7 @@ public class CardLookupFragment extends ListFragment {
             return;
         }
         //get rid of spaces
-        currentQuery = q.toLowerCase().trim().replaceAll("\\s+", "-");
+        currentQuery = q.toLowerCase().trim().replaceAll("\\s+", "-").replaceAll("[,.;:]", "");
         String url = "https://api.deckbrew.com/mtg/cards/" + currentQuery;
         ConnectivityManager connMgr = (ConnectivityManager)
                 getActivity().getSystemService(getActivity().CONNECTIVITY_SERVICE);
@@ -191,6 +210,13 @@ public class CardLookupFragment extends ListFragment {
             }
 
         }
+    }
+
+    public void clearList(){
+        adapter.clear();
+        adapter.notifyDataSetChanged();
+        getListView().invalidateViews();
+        getListView().refreshDrawableState();
     }
 
     //Async task to get card image

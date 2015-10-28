@@ -31,7 +31,7 @@ import org.json.JSONArray;
 import java.util.ArrayList;
 
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements CardLookupFragment.OnSearchSelectedListener {
 
     private final String ARG_LIFE_COUNTER_FRAGMENT = "LifeCounter";
     private final String ARG_CARD_LOOKUP = "CardLookup";
@@ -242,11 +242,18 @@ public class MainActivity extends AppCompatActivity {
                 if (!hasFocus) {
                     mOptionsMenu.findItem(R.id.search).collapseActionView();
                     searchView.setQuery("", false);
+                    CardLookupFragment c = (CardLookupFragment) mContent;
+                    c.clearList();
                 }
             }
         });
 
         return true;
+    }
+
+    @Override
+    public void itemSelected(){
+        mOptionsMenu.findItem(R.id.search).collapseActionView();
     }
 
     //Sync state of nav drawer when activity created
