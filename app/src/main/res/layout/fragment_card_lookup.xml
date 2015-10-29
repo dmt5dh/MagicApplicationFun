@@ -21,4 +21,11 @@
         android:id="@+id/cardImage"
         android:layout_gravity="left|center_vertical" />
 
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/add_card"
+        android:id="@+id/add_button"
+        android:layout_gravity="center_horizontal|bottom" />
+
 </FrameLayout>

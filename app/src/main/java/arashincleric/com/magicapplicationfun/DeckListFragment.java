@@ -1,5 +1,6 @@
 package arashincleric.com.magicapplicationfun;
 
+import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -11,9 +12,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -53,7 +56,7 @@ public class DeckListFragment extends ListFragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
+        setRetainInstance(true);
         //TODO: save json of deck lists
         File deckFile = new File(getActivity().getFilesDir(), FILENAME);
         if(!deckFile.exists()){
@@ -71,10 +74,49 @@ public class DeckListFragment extends ListFragment {
 
     }
 
+    //1: success, 2: deck full, 3: error
+    public int addToDeck(String deck, String card){
+        JSONArray deckArray = getDeckJson();
+        JSONObject deckObject = null;
+        try{
+            int pos = -1;
+            for(int i = 0; i < deckArray.length(); i++){
+                if(deckArray.getJSONObject(i).getString("name").equals(deck)){
+                    deckObject = deckArray.getJSONObject(i);
+                    pos = i;
+                    break;
+                }
+            }
+            if(deckObject != null && pos != -1){
+                JSONArray cardList = deckObject.getJSONArray("deckList");
+                if(cardList.length() > 60){
+                    return 2;
+                }
+                else{
+                    cardList.put(card);
+                    deckObject.put("deckList", cardList);
+                    deckArray.put(pos, deckObject);
+                    FileOutputStream fos = getActivity().openFileOutput(FILENAME, Context.MODE_PRIVATE);
+                    fos.write(deckArray.toString().getBytes());
+                    fos.close();
+                    return 1;
+                }
+
+            }
+
+        } catch(JSONException e){
+            Log.e("ADDTODECK", e.getMessage());
+        } catch (IOException e){
+            Log.e("ADDTODECK", e.getMessage());
+        }
+        return 3;
+    }
+
     public JSONArray getDeckJson(){
         JSONArray deckArray;
         try{
             //Read the JSON
+            Activity a = getActivity();
             FileInputStream fis = getActivity().openFileInput(FILENAME);
             StringBuffer sb = new StringBuffer("");
             byte[] buffer = new byte[1024];
@@ -107,7 +149,7 @@ public class DeckListFragment extends ListFragment {
             JSONArray deckArray = getDeckJson();
             if(deckArray != null){
                 for(int i = 0; i < deckArray.length(); i++){
-                    deckNamesList.add(deckArray.getString(i));
+                    deckNamesList.add(deckArray.getJSONObject(i).getString("name"));
                 }
             }
 
@@ -126,10 +168,11 @@ public class DeckListFragment extends ListFragment {
 
             //Check if already included
             JSONArray deckArray = getDeckJson();
+            //TODO:CLEAN THIS UP
             //do this to check for duplicates but also don't double loop
             if(deckArray != null){
                 for(int i = 0; i < deckArray.length(); i++){
-                    String deckName = deckArray.getString(i);
+                    String deckName = deckArray.getJSONObject(i).getString("name");
                     if(deckName.equals(name)){
                         new AlertDialog.Builder(getActivity())
                                 .setMessage("Name already in use")
@@ -139,7 +182,10 @@ public class DeckListFragment extends ListFragment {
                     }
                     deckNamesList.add(deckName);
                 }
-                deckArray.put(name);
+                JSONObject newDeckObject = new JSONObject();
+                newDeckObject.put("name", name);
+                newDeckObject.putOpt("deckList", new JSONArray());
+                deckArray.put(newDeckObject);
                 deckNamesList.add(name);
 
                 //Saved the file
@@ -155,9 +201,9 @@ public class DeckListFragment extends ListFragment {
             }
 
         } catch (IOException e) {
-            Log.e("ADDDECK", e.getMessage());
+            Log.e("ADDDECK", e.getMessage() + " IO");
         } catch (JSONException e) {
-            Log.e("ADDDECK", e.getMessage());
+            Log.e("ADDDECK", e.getMessage() + " JSON");
         }
 
     }
@@ -178,8 +224,21 @@ public class DeckListFragment extends ListFragment {
     }
 
     @Override
+    public void onViewCreated(View view, Bundle savedInstanceState){
+        getListView().invalidateViews();
+        getListView().refreshDrawableState();
+    }
+
+    @Override
     public void onListItemClick(ListView l, View v, int pos, long id){
         //TODO: click to view whole list
+        JSONArray j = getDeckJson();
+        try{
+            Toast.makeText(getActivity(), j.getJSONObject(pos).toString(), Toast.LENGTH_SHORT).show();
+        } catch (JSONException e) {
+            Log.e("DECKITEMCLICKED", e.getMessage());
+        }
+
     }
 
 

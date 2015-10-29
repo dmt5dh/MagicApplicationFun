@@ -16,6 +16,7 @@ import android.os.Bundle;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SearchView;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -226,7 +227,7 @@ public class MainActivity extends AppCompatActivity implements CardLookupFragmen
             @Override
             public boolean onQueryTextChange(String newText) {
                 //TODO: Implement autocomplete when possible
-                if(!newText.isEmpty()){
+                if (!newText.isEmpty()) {
                     handler.removeCallbacks(runnable);
                     handler.postDelayed(runnable, 100);
                 }
@@ -254,6 +255,37 @@ public class MainActivity extends AppCompatActivity implements CardLookupFragmen
     @Override
     public void itemSelected(){
         mOptionsMenu.findItem(R.id.search).collapseActionView();
+    }
+
+    @Override
+    public ArrayList<String> getDeckList(){
+        DeckListFragment deckListFragment = (DeckListFragment)getSupportFragmentManager()
+                .findFragmentByTag(ARG_CARD_DECKLIST);
+
+        if(deckListFragment == null){
+            FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+            deckListFragment = DeckListFragment.newInstance();
+            transaction.add(R.id.fragment_container, deckListFragment, ARG_CARD_DECKLIST);
+            transaction.detach(deckListFragment);
+            transaction.commit();
+            getSupportFragmentManager().executePendingTransactions();
+
+        }
+
+        return deckListFragment.getDeckList();
+    }
+    public int addToDeck(String deck, String card){
+        DeckListFragment deckListFragment = (DeckListFragment)getSupportFragmentManager()
+                .findFragmentByTag(ARG_CARD_DECKLIST);
+
+        if(deckListFragment == null){
+            FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+            deckListFragment = DeckListFragment.newInstance();
+            transaction.add(deckListFragment, ARG_CARD_DECKLIST);
+            transaction.commit();
+        }
+
+        return deckListFragment.addToDeck(deck, card);
     }
 
     //Sync state of nav drawer when activity created

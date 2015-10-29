@@ -1,6 +1,7 @@
 package arashincleric.com.magicapplicationfun;
 
 import android.app.Activity;
+import android.content.DialogInterface;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.ConnectivityManager;
@@ -10,11 +11,14 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.ListFragment;
+import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -28,6 +32,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.Array;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
@@ -46,10 +51,15 @@ public class CardLookupFragment extends ListFragment {
     private String currentQuery;
     private ArrayAdapter<String> adapter;
     private OnSearchSelectedListener mCallback;
+    private Button addCardBtn;
+    private String currentCard;
 
     //Tell activity to clean up search bar when something chosen
     public interface OnSearchSelectedListener {
         public void itemSelected();
+        public ArrayList<String> getDeckList();
+        public int addToDeck(String deck, String card);
+
     }
 
     /**
@@ -71,6 +81,7 @@ public class CardLookupFragment extends ListFragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setRetainInstance(true);
     }
 
     @Override
@@ -89,6 +100,65 @@ public class CardLookupFragment extends ListFragment {
         cardImage = (ImageView)view.findViewById(R.id.cardImage);
 
         textView = (TextView)view.findViewById(R.id.cardInfo);
+
+        addCardBtn = (Button)view.findViewById(R.id.add_button);
+        addCardBtn.setVisibility(View.GONE);
+
+        addCardBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //TODO:AlertDIalog to add to deck
+                ArrayList<String> decksList = mCallback.getDeckList();
+                final ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity(),
+                        android.R.layout.simple_list_item_1, decksList);
+                final ListView listView = new ListView(getActivity());
+                listView.setAdapter(adapter);
+
+                new AlertDialog.Builder(getActivity())
+                        .setTitle("Add card to which deck?")
+                        .setNegativeButton("Cancel", null)
+//                                .setView(listView)
+                        .setAdapter(adapter, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                final String deck = adapter.getItem(which);
+                                new AlertDialog.Builder(getActivity())
+                                        .setMessage("Are you sure?")
+                                        .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                                            @Override
+                                            public void onClick(DialogInterface dialog, int which) {
+                                                int i = mCallback.addToDeck(deck, currentCard);
+                                                switch (i) {
+                                                    case 1:
+                                                        new AlertDialog.Builder(getActivity())
+                                                                .setMessage("Success")
+                                                                .setNegativeButton("Close", null)
+                                                                .show();
+                                                        break;
+                                                    case 2:
+                                                        new AlertDialog.Builder(getActivity())
+                                                                .setMessage("Deck list full")
+                                                                .setNegativeButton("Close", null)
+                                                                .show();
+                                                        break;
+                                                    default:
+                                                        new AlertDialog.Builder(getActivity())
+                                                                .setMessage("Error adding card")
+                                                                .setNegativeButton("Close", null)
+                                                                .show();
+                                                        break;
+                                                }
+                                            }
+                                        })
+                                        .setNegativeButton("Cancel", null)
+                                        .show();
+                            }
+                        })
+                        .show();
+
+
+            }
+        });
     }
 
     public void getAutoComplete(String query){
@@ -117,7 +187,7 @@ public class CardLookupFragment extends ListFragment {
             mCallback = (OnSearchSelectedListener) activity;
         } catch (ClassCastException e){
             throw new ClassCastException(activity.toString()
-                    + " must imlement OnSearchSelectedListener");
+                    + " must implement OnSearchSelectedListener");
         }
     }
 
@@ -126,7 +196,7 @@ public class CardLookupFragment extends ListFragment {
             return;
         }
         //get rid of spaces
-        currentQuery = q.toLowerCase().trim().replaceAll("\\s+", "-").replaceAll("[,.;:]", "");
+        currentQuery = q.toLowerCase().trim().replaceAll("\\s+", "-").replaceAll("[,.;:'`]", "");
         String url = "https://api.deckbrew.com/mtg/cards/" + currentQuery;
         ConnectivityManager connMgr = (ConnectivityManager)
                 getActivity().getSystemService(getActivity().CONNECTIVITY_SERVICE);
@@ -166,6 +236,7 @@ public class CardLookupFragment extends ListFragment {
                 new DownloadImage().execute(results);
                 cardImage.setVisibility(View.VISIBLE);
                 textView.setVisibility(View.VISIBLE);
+                addCardBtn.setVisibility(View.VISIBLE);
             }
 
         }
@@ -284,6 +355,7 @@ public class CardLookupFragment extends ListFragment {
         try{
             stats = new JSONObject(results);
             //TODO: specify what info to print and remove brackets in some values
+            currentCard = stats.getString("name");
             String name = stats.getString("name") + '\n';
             String types = stats.getString("types") + '\n';
             String subtypes = stats.getString("subtypes") + '\n';
