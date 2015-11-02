@@ -89,7 +89,8 @@ public class DeckListFragment extends ListFragment {
             }
             if(deckObject != null && pos != -1){
                 JSONArray cardList = deckObject.getJSONArray("deckList");
-                if(cardList.length() > 60){
+                int i = cardList.length();
+                if(cardList.length() >= 60){
                     return 2;
                 }
                 else{

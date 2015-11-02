@@ -115,42 +115,44 @@ public class CardLookupFragment extends ListFragment {
                 listView.setAdapter(adapter);
 
                 new AlertDialog.Builder(getActivity())
-                        .setTitle("Add card to which deck?")
-                        .setNegativeButton("Cancel", null)
+                        .setTitle(R.string.alert_add_deck_sel)
+                        .setNegativeButton(R.string.alert_cancel, null)
 //                                .setView(listView)
                         .setAdapter(adapter, new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
                                 final String deck = adapter.getItem(which);
+                                String confirmTemplate = getResources().getString(R.string.alert_confirmation);
+                                String confirmMsg = String.format(confirmTemplate, currentCard, deck);
                                 new AlertDialog.Builder(getActivity())
-                                        .setMessage("Are you sure?")
-                                        .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                                        .setMessage(confirmMsg)
+                                        .setPositiveButton(R.string.alert_yes, new DialogInterface.OnClickListener() {
                                             @Override
                                             public void onClick(DialogInterface dialog, int which) {
                                                 int i = mCallback.addToDeck(deck, currentCard);
                                                 switch (i) {
                                                     case 1:
                                                         new AlertDialog.Builder(getActivity())
-                                                                .setMessage("Success")
-                                                                .setNegativeButton("Close", null)
+                                                                .setMessage(R.string.alert_success)
+                                                                .setNegativeButton(R.string.alert_close, null)
                                                                 .show();
                                                         break;
                                                     case 2:
                                                         new AlertDialog.Builder(getActivity())
-                                                                .setMessage("Deck list full")
-                                                                .setNegativeButton("Close", null)
+                                                                .setMessage(R.string.alert_deck_full)
+                                                                .setNegativeButton(R.string.alert_close, null)
                                                                 .show();
                                                         break;
                                                     default:
                                                         new AlertDialog.Builder(getActivity())
-                                                                .setMessage("Error adding card")
-                                                                .setNegativeButton("Close", null)
+                                                                .setMessage(R.string.alert_error)
+                                                                .setNegativeButton(R.string.alert_close, null)
                                                                 .show();
                                                         break;
                                                 }
                                             }
                                         })
-                                        .setNegativeButton("Cancel", null)
+                                        .setNegativeButton(R.string.alert_cancel, null)
                                         .show();
                             }
                         })

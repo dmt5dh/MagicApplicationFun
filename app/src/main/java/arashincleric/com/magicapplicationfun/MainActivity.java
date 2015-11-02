@@ -10,6 +10,7 @@ import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -75,15 +76,18 @@ public class MainActivity extends AppCompatActivity implements CardLookupFragmen
     //Override the back logic to support back button for fragments
     @Override
     public void onBackPressed(){
-        if (fragmentStack.size() == 1){
+        if(mDrawerLayout.isDrawerOpen(GravityCompat.START)){
+            mDrawerLayout.closeDrawers();
+        }
+        else if (fragmentStack.size() == 1){
             finish();
         }
         else if (fragmentStack.size() > 1) {
             FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-            transaction.detach(mContent);
+            transaction.hide(mContent);
             fragmentStack.remove(fragmentStack.size() - 1);
             mContent = fragmentStack.get(fragmentStack.size() - 1);
-            transaction.attach(mContent);
+            transaction.show(mContent);
             transaction.commit();
             curFragName = mContent.getTag();
             onPrepareOptionsMenu(mOptionsMenu);
@@ -260,7 +264,7 @@ public class MainActivity extends AppCompatActivity implements CardLookupFragmen
             FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
             deckListFragment = DeckListFragment.newInstance();
             transaction.add(R.id.fragment_container, deckListFragment, ARG_CARD_DECKLIST);
-            transaction.detach(deckListFragment);
+            transaction.hide(deckListFragment);
             transaction.commit();
             getSupportFragmentManager().executePendingTransactions();
 
