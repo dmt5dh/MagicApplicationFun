@@ -29,7 +29,7 @@ import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity implements CardLookupFragment.OnSearchSelectedListener {
 
-    private final String ARG_LIFE_COUNTER_FRAGMENT = "LifeCounter";
+    public final String ARG_LIFE_COUNTER_FRAGMENT = "LifeCounter";
     private final String ARG_CARD_LOOKUP = "CardLookup";
     private final String ARG_CARD_DECKLIST= "Decklist";
     private final String ARG_CURRENT_FRAGMENT= "CurrentFragment";
@@ -189,7 +189,7 @@ public class MainActivity extends AppCompatActivity implements CardLookupFragmen
 
     //Associate the data to the listview in nav drawer
     private void addDrawerItems(){
-        String[] navListArray = {"Life Counter", "Card Lookup", "Decklist"};
+        String[] navListArray = getResources().getStringArray(R.array.nav_drawer_menu);
         ArrayAdapter<String> mAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, navListArray);
         mDrawerList.setAdapter(mAdapter);
     }
@@ -404,16 +404,16 @@ public class MainActivity extends AppCompatActivity implements CardLookupFragmen
             final DeckListFragment deckListFragment = (DeckListFragment)getSupportFragmentManager()
                     .findFragmentByTag(ARG_CARD_DECKLIST);
             final EditText input = new EditText(this);
-            input.setHint("Deck name");
+            input.setHint(R.string.add_deck_hint);
             new AlertDialog.Builder(this)
-                    .setMessage("Add a new deck?")
-                    .setPositiveButton("Create", new DialogInterface.OnClickListener() {
+                    .setMessage(R.string.add_deck_confirmation)
+                    .setPositiveButton(R.string.add_deck, new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
                             deckListFragment.addDeck(input.getText().toString());
                         }
                     })
-                    .setNegativeButton("Cancel",null)
+                    .setNegativeButton(R.string.alert_cancel,null)
                     .setView(input)
                     .show();
 

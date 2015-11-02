@@ -2,6 +2,7 @@ package arashincleric.com.magicapplicationfun;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.ListFragment;
@@ -22,6 +23,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 
 
@@ -37,6 +39,8 @@ public class DeckListFragment extends ListFragment {
      * this fragment using the provided parameters.
      */
 
+    public final static String DECK_LIST_MESSAGE = "com.arashincleric.magicapplicationfun.DECKLIST";
+    public final static String DECK_NAME_MESSAGE = "com.arashincleric.magicapplicationfun.DECKNAME";
     private ArrayAdapter<String> adapter;
     private final String FILENAME = "decklist_json";
 
@@ -176,8 +180,8 @@ public class DeckListFragment extends ListFragment {
                     String deckName = deckArray.getJSONObject(i).getString("name");
                     if(deckName.equals(name)){
                         new AlertDialog.Builder(getActivity())
-                                .setMessage("Name already in use")
-                                .setNegativeButton("Close", null)
+                                .setMessage(R.string.add_deck_in_use)
+                                .setNegativeButton(R.string.alert_close, null)
                                 .show();
                         return;
                     }
@@ -213,10 +217,6 @@ public class DeckListFragment extends ListFragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
-
-//        String[] values = new String[] { "Android", "iPhone", "WindowsMobile",
-//                "Blackberry", "WebOS", "Ubuntu", "Windows7", "Max OS X",
-//                "Linux", "OS/2" };
         adapter = new ArrayAdapter<String>(getActivity(),
                 android.R.layout.simple_list_item_1, getDeckList());
         setListAdapter(adapter);
@@ -235,7 +235,17 @@ public class DeckListFragment extends ListFragment {
         //TODO: click to view whole list
         JSONArray j = getDeckJson();
         try{
-            Toast.makeText(getActivity(), j.getJSONObject(pos).toString(), Toast.LENGTH_SHORT).show();
+            JSONObject object = j.getJSONObject(pos);
+            JSONArray array = object.getJSONArray("deckList");
+            ArrayList<String> deckList = new ArrayList<String>();
+            for(int i = 0; i < array.length(); i++){
+                deckList.add(array.getString(i));
+            }
+            Intent intent = new Intent(getActivity(), ViewDeckActivity.class);
+            intent.putStringArrayListExtra(DECK_LIST_MESSAGE, deckList);
+            intent.putExtra(DECK_NAME_MESSAGE, object.getString("name"));
+            startActivity(intent);
+//            Toast.makeText(getActivity(), j.getJSONObject(pos).toString(), Toast.LENGTH_SHORT).show();
         } catch (JSONException e) {
             Log.e("DECKITEMCLICKED", e.getMessage());
         }

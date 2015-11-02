@@ -19,7 +19,10 @@
     <string name="search_title">Search card</string>
     <string name="search_hint">Search card name</string>
     <string name="search_intro">Use search bar above to look up a card</string>
-    <string name="add_deck">Add deck</string>
+    <string name="add_deck">Create deck</string>
+    <string name="add_deck_hint">Deck name</string>
+    <string name="add_deck_confirmation">Add a new deck?</string>
+    <string name="add_deck_in_use">Deck name already in use</string>
     <string name="add_card">Add to deck</string>
     <string name="alert_add_deck_sel">Add card to which deck?</string>
     <string name="alert_cancel">Cancel</string>
@@ -29,9 +32,17 @@
     <string name="alert_error">Error adding card</string>
     <string name="alert_deck_full">Deck is full</string>
     <string name="alert_close">Close</string>
+    <string name="alert_no_decks">You have no decks present</string>
+    <string-array name="nav_drawer_menu">
+        <item>Life Counter</item>
+        <item>Card Lookup</item>
+        <item>Decklists</item>
+    </string-array>
+    
 
 
 <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="hello_blank_fragment2">Hello blank fragment2</string>
+    <string name="title_activity_view_deck">ViewDeckActivity</string>
 </resources>

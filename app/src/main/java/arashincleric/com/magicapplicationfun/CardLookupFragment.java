@@ -78,6 +78,11 @@ public class CardLookupFragment extends ListFragment {
         // Required empty public constructor
     }
 
+    //Some things show up when we're in main activity
+    public boolean isAttachedToMain(){
+        return getActivity().getClass().getName().equals(MainActivity.class.getName());
+    }
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -101,6 +106,9 @@ public class CardLookupFragment extends ListFragment {
 
         textView = (TextView)view.findViewById(R.id.cardInfo);
 
+        if(!isAttachedToMain()){
+            textView.setVisibility(View.GONE);
+        }
         addCardBtn = (Button)view.findViewById(R.id.add_button);
         addCardBtn.setVisibility(View.GONE);
 
@@ -109,56 +117,62 @@ public class CardLookupFragment extends ListFragment {
             public void onClick(View v) {
                 //TODO:AlertDIalog to add to deck
                 ArrayList<String> decksList = mCallback.getDeckList();
-                final ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity(),
-                        android.R.layout.simple_list_item_1, decksList);
-                final ListView listView = new ListView(getActivity());
-                listView.setAdapter(adapter);
+                if(decksList.isEmpty()){
+                    new AlertDialog.Builder(getActivity())
+                            .setMessage(R.string.alert_no_decks)
+                            .setNegativeButton(R.string.alert_close, null)
+                            .show();
+                }
+                else{
+                    final ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity(),
+                            android.R.layout.simple_list_item_1, decksList);
+                    final ListView listView = new ListView(getActivity());
+                    listView.setAdapter(adapter);
 
-                new AlertDialog.Builder(getActivity())
-                        .setTitle(R.string.alert_add_deck_sel)
-                        .setNegativeButton(R.string.alert_cancel, null)
+                    new AlertDialog.Builder(getActivity())
+                            .setTitle(R.string.alert_add_deck_sel)
+                            .setNegativeButton(R.string.alert_cancel, null)
 //                                .setView(listView)
-                        .setAdapter(adapter, new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                final String deck = adapter.getItem(which);
-                                String confirmTemplate = getResources().getString(R.string.alert_confirmation);
-                                String confirmMsg = String.format(confirmTemplate, currentCard, deck);
-                                new AlertDialog.Builder(getActivity())
-                                        .setMessage(confirmMsg)
-                                        .setPositiveButton(R.string.alert_yes, new DialogInterface.OnClickListener() {
-                                            @Override
-                                            public void onClick(DialogInterface dialog, int which) {
-                                                int i = mCallback.addToDeck(deck, currentCard);
-                                                switch (i) {
-                                                    case 1:
-                                                        new AlertDialog.Builder(getActivity())
-                                                                .setMessage(R.string.alert_success)
-                                                                .setNegativeButton(R.string.alert_close, null)
-                                                                .show();
-                                                        break;
-                                                    case 2:
-                                                        new AlertDialog.Builder(getActivity())
-                                                                .setMessage(R.string.alert_deck_full)
-                                                                .setNegativeButton(R.string.alert_close, null)
-                                                                .show();
-                                                        break;
-                                                    default:
-                                                        new AlertDialog.Builder(getActivity())
-                                                                .setMessage(R.string.alert_error)
-                                                                .setNegativeButton(R.string.alert_close, null)
-                                                                .show();
-                                                        break;
+                            .setAdapter(adapter, new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    final String deck = adapter.getItem(which);
+                                    String confirmTemplate = getResources().getString(R.string.alert_confirmation);
+                                    String confirmMsg = String.format(confirmTemplate, currentCard, deck);
+                                    new AlertDialog.Builder(getActivity())
+                                            .setMessage(confirmMsg)
+                                            .setPositiveButton(R.string.alert_yes, new DialogInterface.OnClickListener() {
+                                                @Override
+                                                public void onClick(DialogInterface dialog, int which) {
+                                                    int i = mCallback.addToDeck(deck, currentCard);
+                                                    switch (i) {
+                                                        case 1:
+                                                            new AlertDialog.Builder(getActivity())
+                                                                    .setMessage(R.string.alert_success)
+                                                                    .setNegativeButton(R.string.alert_close, null)
+                                                                    .show();
+                                                            break;
+                                                        case 2:
+                                                            new AlertDialog.Builder(getActivity())
+                                                                    .setMessage(R.string.alert_deck_full)
+                                                                    .setNegativeButton(R.string.alert_close, null)
+                                                                    .show();
+                                                            break;
+                                                        default:
+                                                            new AlertDialog.Builder(getActivity())
+                                                                    .setMessage(R.string.alert_error)
+                                                                    .setNegativeButton(R.string.alert_close, null)
+                                                                    .show();
+                                                            break;
+                                                    }
                                                 }
-                                            }
-                                        })
-                                        .setNegativeButton(R.string.alert_cancel, null)
-                                        .show();
-                            }
-                        })
-                        .show();
-
-
+                                            })
+                                            .setNegativeButton(R.string.alert_cancel, null)
+                                            .show();
+                                }
+                            })
+                            .show();
+                }
             }
         });
     }
@@ -185,11 +199,13 @@ public class CardLookupFragment extends ListFragment {
     @Override
     public void onAttach(Activity activity){
         super.onAttach(activity);
-        try{
-            mCallback = (OnSearchSelectedListener) activity;
-        } catch (ClassCastException e){
-            throw new ClassCastException(activity.toString()
-                    + " must implement OnSearchSelectedListener");
+        if(isAttachedToMain()){
+            try{
+                mCallback = (OnSearchSelectedListener) activity;
+            } catch (ClassCastException e){
+                throw new ClassCastException(activity.toString()
+                        + " must implement OnSearchSelectedListener");
+            }
         }
     }
 
@@ -238,7 +254,12 @@ public class CardLookupFragment extends ListFragment {
                 new DownloadImage().execute(results);
                 cardImage.setVisibility(View.VISIBLE);
                 textView.setVisibility(View.VISIBLE);
-                addCardBtn.setVisibility(View.VISIBLE);
+                if(!isAttachedToMain()){
+                    addCardBtn.setVisibility(View.GONE);
+                }
+                else{
+                    addCardBtn.setVisibility(View.VISIBLE);
+                }
             }
 
         }
