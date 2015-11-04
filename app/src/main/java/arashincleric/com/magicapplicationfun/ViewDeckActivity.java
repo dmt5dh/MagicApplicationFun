@@ -18,6 +18,7 @@ public class ViewDeckActivity extends AppCompatActivity implements ViewDeckListF
 
     private final String ARG_CARD_LOOKUP = "CardLookup";
     private final String ARG_CARD_DECKLIST= "Decklist";
+    private final String ARG_DECK_FRAG= "DeckFrag";
     private ArrayList<String> deckList;
     private Fragment mContent;
     private String deckName;
@@ -54,8 +55,22 @@ public class ViewDeckActivity extends AppCompatActivity implements ViewDeckListF
         }
     }
 
-    public int deleteCard(String cardName){
-        return 0;
+    public ArrayList<String> deleteCard(String cardName){
+        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+        if(mContent != null){
+            Fragment fragment = getSupportFragmentManager().findFragmentByTag(ARG_DECK_FRAG);
+            if(fragment == null){
+                fragment = DeckListFragment.newInstance();
+                transaction.add(fragment, ARG_DECK_FRAG);
+                transaction.commit();
+                getSupportFragmentManager().executePendingTransactions();
+            }
+
+            return ((DeckListFragment) fragment).deleteFromDeck(deckName, cardName);
+
+        }
+
+        return null;
     }
 
     @Override

@@ -78,6 +78,53 @@ public class DeckListFragment extends ListFragment {
 
     }
 
+    //1; success, 2:error
+    public ArrayList<String> deleteFromDeck(String deck, String card){
+        JSONArray deckArray = getDeckJson();
+        JSONObject deckObject = null;
+        try{
+            int pos = -1;
+            for(int i = 0; i < deckArray.length(); i++){
+                if(deckArray.getJSONObject(i).getString("name").equals(deck)){
+                    deckObject = deckArray.getJSONObject(i);
+                    pos = i;
+                    break;
+                }
+            }
+            if(deckObject != null && pos != -1){
+                JSONArray cardList = deckObject.getJSONArray("deckList");
+                for(int i = 0; i < cardList.length(); i++){
+                    if(cardList.get(i).equals(card)){
+                        cardList.remove(i);
+                        break;
+                    }
+                }
+                deckObject.put("deckList", cardList);
+                deckArray.put(pos, deckObject);
+                FileOutputStream fos = getActivity().openFileOutput(FILENAME, Context.MODE_PRIVATE);
+                fos.write(deckArray.toString().getBytes());
+                fos.close();
+
+                ArrayList<String> updatedList = new ArrayList<String>();
+                for(int i = 0; i < cardList.length(); i++){
+                    updatedList.add(cardList.getString(i));
+                }
+                return updatedList;
+
+            }
+            else{
+                return null;
+            }
+
+        } catch (JSONException e){
+            Log.e("ADDTODECK", e.getMessage());
+            return null;
+        } catch (IOException e){
+            Log.e("ADDTODECK", e.getMessage());
+            return null;
+        }
+    }
+
     //1: success, 2: deck full, 3: error
     public int addToDeck(String deck, String card){
         JSONArray deckArray = getDeckJson();
@@ -93,7 +140,6 @@ public class DeckListFragment extends ListFragment {
             }
             if(deckObject != null && pos != -1){
                 JSONArray cardList = deckObject.getJSONArray("deckList");
-                int i = cardList.length();
                 if(cardList.length() >= 60){
                     return 2;
                 }

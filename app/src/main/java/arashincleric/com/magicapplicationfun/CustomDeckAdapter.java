@@ -59,7 +59,7 @@ public class CustomDeckAdapter extends BaseAdapter implements ListAdapter {
         deleteBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(context, cardItem.getText().toString(), Toast.LENGTH_SHORT).show();
+                ((ViewDeckListFragment)fragment).deleteCard(list.get(position));
             }
         });
 
@@ -73,5 +73,10 @@ public class CustomDeckAdapter extends BaseAdapter implements ListAdapter {
 
 
         return view;
+    }
+
+    public void updateList(ArrayList<String> updatedList){
+        this.list = updatedList;
+        notifyDataSetChanged();
     }
 }
