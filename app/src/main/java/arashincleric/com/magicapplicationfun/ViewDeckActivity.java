@@ -1,10 +1,12 @@
 package arashincleric.com.magicapplicationfun;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Choreographer;
 import android.view.Menu;
@@ -105,8 +107,31 @@ public class ViewDeckActivity extends AppCompatActivity implements ViewDeckListF
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
+        if (id == R.id.action_delete) {
+            String deleteDeck = getResources().getString(R.string.alert_delete_deck);
+            String deleteDeckMsg = String.format(deleteDeck, deckName);
+            new AlertDialog.Builder(this)
+                    .setMessage(deleteDeckMsg)
+                    .setPositiveButton(R.string.alert_yes, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+                            DeckListFragment deckListFragment =
+                                    (DeckListFragment)getSupportFragmentManager().findFragmentByTag(ARG_DECK_FRAG);
+
+                            if(deckListFragment == null){
+                                deckListFragment = DeckListFragment.newInstance();
+                                transaction.add(deckListFragment, ARG_DECK_FRAG);
+                                transaction.commit();
+                            }
+                            getSupportFragmentManager().executePendingTransactions();
+                            deckListFragment.deleteDeck(deckName);
+                            finish();
+
+                        }
+                    })
+                    .setNegativeButton(R.string.alert_cancel, null)
+                    .show();
         }
 
         return super.onOptionsItemSelected(item);

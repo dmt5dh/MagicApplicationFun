@@ -39,6 +39,8 @@
         <item>Card Lookup</item>
         <item>Decklists</item>
     </string-array>
+    <string name="alert_delete_deck">Delete this deck (%1$s)?</string>
+    <string name="action_delete_deck">Delete deck?</string>
     
 
 

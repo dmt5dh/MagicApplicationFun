@@ -65,10 +65,8 @@ public class DeckListFragment extends ListFragment {
         File deckFile = new File(getActivity().getFilesDir(), FILENAME);
         if(!deckFile.exists()){
             try{
-                FileOutputStream fos = getActivity().openFileOutput(FILENAME, Context.MODE_PRIVATE);
                 JSONArray userDecks = new JSONArray(); //Add blank stuff
-                fos.write(userDecks.toString(4).getBytes());
-                fos.close();
+                writeToFile(userDecks.toString());
             }
             catch(Exception e){
                 Log.e("DECKLIST", e.getMessage());
@@ -76,6 +74,48 @@ public class DeckListFragment extends ListFragment {
 
         }
 
+    }
+
+    private void writeToFile(String content){
+        try{
+            FileOutputStream fos = getActivity().openFileOutput(FILENAME, Context.MODE_PRIVATE);
+            fos.write(content.getBytes());
+            fos.close();
+        } catch (Exception e){
+            Log.e("DECKFILE", e.getMessage());
+        }
+    }
+
+    public void deleteDeck(String deckName){
+        try{
+            JSONArray deckArray = getDeckJson();
+            for(int i = 0; i < deckArray.length(); i++){
+                if(deckArray.getJSONObject(i).getString("name").equals(deckName)){
+                    deckArray.remove(i);
+                    break;
+                }
+            }
+
+            writeToFile(deckArray.toString());
+
+
+        } catch(JSONException e){
+            Log.e("DELETEDECK", e.getMessage());
+        }
+    }
+
+    @Override
+    public void onResume(){
+        super.onResume();
+        refreshListView();
+    }
+
+    public void refreshListView(){
+        adapter.clear();
+        adapter.addAll(getDeckList());
+        adapter.notifyDataSetChanged();
+        getListView().invalidateViews();
+        getListView().refreshDrawableState();
     }
 
     //1; success, 2:error
@@ -101,9 +141,8 @@ public class DeckListFragment extends ListFragment {
                 }
                 deckObject.put("deckList", cardList);
                 deckArray.put(pos, deckObject);
-                FileOutputStream fos = getActivity().openFileOutput(FILENAME, Context.MODE_PRIVATE);
-                fos.write(deckArray.toString().getBytes());
-                fos.close();
+
+                writeToFile(deckArray.toString());
 
                 ArrayList<String> updatedList = new ArrayList<String>();
                 for(int i = 0; i < cardList.length(); i++){
@@ -117,9 +156,6 @@ public class DeckListFragment extends ListFragment {
             }
 
         } catch (JSONException e){
-            Log.e("ADDTODECK", e.getMessage());
-            return null;
-        } catch (IOException e){
             Log.e("ADDTODECK", e.getMessage());
             return null;
         }
@@ -147,17 +183,14 @@ public class DeckListFragment extends ListFragment {
                     cardList.put(card);
                     deckObject.put("deckList", cardList);
                     deckArray.put(pos, deckObject);
-                    FileOutputStream fos = getActivity().openFileOutput(FILENAME, Context.MODE_PRIVATE);
-                    fos.write(deckArray.toString().getBytes());
-                    fos.close();
+
+                    writeToFile(deckArray.toString());
                     return 1;
                 }
 
             }
 
         } catch(JSONException e){
-            Log.e("ADDTODECK", e.getMessage());
-        } catch (IOException e){
             Log.e("ADDTODECK", e.getMessage());
         }
         return 3;
@@ -240,9 +273,7 @@ public class DeckListFragment extends ListFragment {
                 deckNamesList.add(name);
 
                 //Saved the file
-                FileOutputStream fos = getActivity().openFileOutput(FILENAME, Context.MODE_PRIVATE);
-                fos.write(deckArray.toString().getBytes());
-                fos.close();
+                writeToFile(deckArray.toString());
 
                 adapter.clear();
                 adapter.addAll(deckNamesList);
@@ -251,8 +282,6 @@ public class DeckListFragment extends ListFragment {
                 getListView().refreshDrawableState();
             }
 
-        } catch (IOException e) {
-            Log.e("ADDDECK", e.getMessage() + " IO");
         } catch (JSONException e) {
             Log.e("ADDDECK", e.getMessage() + " JSON");
         }

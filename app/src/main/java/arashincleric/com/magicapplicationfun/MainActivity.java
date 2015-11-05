@@ -251,6 +251,14 @@ public class MainActivity extends AppCompatActivity implements CardLookupFragmen
     }
 
     @Override
+    protected void onResume(){
+        super.onResume();
+        if(mContent != null){
+            mContent.onResume();
+        }
+    }
+
+    @Override
     public void itemSelected(){
         mOptionsMenu.findItem(R.id.search).collapseActionView();
     }
@@ -281,6 +289,7 @@ public class MainActivity extends AppCompatActivity implements CardLookupFragmen
             deckListFragment = DeckListFragment.newInstance();
             transaction.add(deckListFragment, ARG_CARD_DECKLIST);
             transaction.commit();
+            getSupportFragmentManager().executePendingTransactions();
         }
 
         return deckListFragment.addToDeck(deck, card);
@@ -371,7 +380,7 @@ public class MainActivity extends AppCompatActivity implements CardLookupFragmen
         }
         invalidateOptionsMenu();
         return super.onPrepareOptionsMenu(menu);
-    }
+}
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
