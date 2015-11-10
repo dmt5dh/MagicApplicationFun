@@ -16,7 +16,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -31,8 +30,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
-import java.io.UnsupportedEncodingException;
-import java.lang.reflect.Array;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
@@ -58,7 +55,7 @@ public class CardLookupFragment extends ListFragment {
     public interface OnSearchSelectedListener {
         public void itemSelected();
         public ArrayList<String> getDeckList();
-        public int addToDeck(String deck, String card);
+        public int addToDeck(String deck, String card, boolean isMain);
 
     }
 
@@ -69,7 +66,7 @@ public class CardLookupFragment extends ListFragment {
      */
     public static CardLookupFragment newInstance() {
         CardLookupFragment fragment = new CardLookupFragment();
-        Bundle args = new Bundle();
+        Bundle args = new Bundle(); //TODO: do i need this?
         fragment.setArguments(args);
         return fragment;
     }
@@ -78,7 +75,11 @@ public class CardLookupFragment extends ListFragment {
         // Required empty public constructor
     }
 
-    //Some things show up when we're in main activity
+    /**
+     * Checks to see if fragment is attached to the main activity. Only the main activity can the
+     * card lookup add cards. Otherwise the user is just viewing the card.
+     * @return <tt>true</tt> If this fragment is attached to the main activity.
+     */
     public boolean isAttachedToMain(){
         return getActivity().getClass().getName().equals(MainActivity.class.getName());
     }
@@ -115,7 +116,6 @@ public class CardLookupFragment extends ListFragment {
         addCardBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //TODO:AlertDIalog to add to deck
                 ArrayList<String> decksList = mCallback.getDeckList();
                 if(decksList.isEmpty()){
                     new AlertDialog.Builder(getActivity())
@@ -124,15 +124,17 @@ public class CardLookupFragment extends ListFragment {
                             .show();
                 }
                 else{
+                    //Set up ListView for alert dialog
                     final ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity(),
                             android.R.layout.simple_list_item_1, decksList);
                     final ListView listView = new ListView(getActivity());
                     listView.setAdapter(adapter);
+                    final CharSequence a[] = {"main", "side"};
+                    final boolean b[] = {false, false}; //false to leave unchecked
 
                     new AlertDialog.Builder(getActivity())
                             .setTitle(R.string.alert_add_deck_sel)
                             .setNegativeButton(R.string.alert_cancel, null)
-//                                .setView(listView)
                             .setAdapter(adapter, new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialog, int which) {
@@ -140,31 +142,61 @@ public class CardLookupFragment extends ListFragment {
                                     String confirmTemplate = getResources().getString(R.string.alert_confirmation);
                                     String confirmMsg = String.format(confirmTemplate, currentCard, deck);
                                     new AlertDialog.Builder(getActivity())
-                                            .setMessage(confirmMsg)
+                                            .setTitle(confirmMsg)
+                                            .setMultiChoiceItems(a, b, new DialogInterface.OnMultiChoiceClickListener() {
+                                                @Override
+                                                public void onClick(DialogInterface dialog, int which, boolean isChecked) {
+                                                    if (isChecked) {
+                                                        b[which] = true;
+                                                    } else {
+                                                        b[which] = false;
+                                                    }
+                                                }
+                                            })
                                             .setPositiveButton(R.string.alert_yes, new DialogInterface.OnClickListener() {
                                                 @Override
                                                 public void onClick(DialogInterface dialog, int which) {
-                                                    int i = mCallback.addToDeck(deck, currentCard);
-                                                    switch (i) {
+                                                    int mainResult = -1;
+                                                    int sideResult = -1;
+                                                    if (b[0]) { //Add to main if necessary
+                                                        mainResult = mCallback.addToDeck(deck, currentCard, true);
+                                                    }
+                                                    if (b[1]) { //Add to sideboard if necessary
+                                                        sideResult = mCallback.addToDeck(deck, currentCard, false);
+                                                    }
+
+                                                    //Build response string here
+                                                    String alertSuccess = getResources().getString(R.string.alert_success);
+                                                    String alertFull = getResources().getString(R.string.alert_deck_full);
+                                                    String alertError = getResources().getString(R.string.alert_error);
+                                                    String mainMsg = "";
+                                                    String sideMsg = "";
+                                                    switch (mainResult) {
+                                                        case 0:
+                                                            mainMsg = String.format(alertSuccess, deck + "(Main)");
+                                                            break;
                                                         case 1:
-                                                            new AlertDialog.Builder(getActivity())
-                                                                    .setMessage(R.string.alert_success)
-                                                                    .setNegativeButton(R.string.alert_close, null)
-                                                                    .show();
+                                                            mainMsg = String.format(alertFull, deck + "(Main)");
                                                             break;
-                                                        case 2:
-                                                            new AlertDialog.Builder(getActivity())
-                                                                    .setMessage(R.string.alert_deck_full)
-                                                                    .setNegativeButton(R.string.alert_close, null)
-                                                                    .show();
-                                                            break;
-                                                        default:
-                                                            new AlertDialog.Builder(getActivity())
-                                                                    .setMessage(R.string.alert_error)
-                                                                    .setNegativeButton(R.string.alert_close, null)
-                                                                    .show();
+                                                        case 4:
+                                                            mainMsg = String.format(alertError, deck + "(Main)");
                                                             break;
                                                     }
+                                                    switch (sideResult) {
+                                                        case 0:
+                                                            sideMsg = String.format(alertSuccess, deck + "(Side)");
+                                                            break;
+                                                        case 2:
+                                                            sideMsg = String.format(alertFull, deck + "(Side)");
+                                                            break;
+                                                        case 4:
+                                                            sideMsg = String.format(alertError, deck + "(Side)");
+                                                            break;
+                                                    }
+                                                    new AlertDialog.Builder(getActivity())
+                                                            .setMessage(mainMsg + '\n' + sideMsg)
+                                                            .setNegativeButton(R.string.alert_close, null)
+                                                            .show();
                                                 }
                                             })
                                             .setNegativeButton(R.string.alert_cancel, null)
@@ -177,10 +209,15 @@ public class CardLookupFragment extends ListFragment {
         });
     }
 
+    /**
+     * Sends a query to Deckbrew API to find possible matches.
+     * @param query The string of characters to enter to search
+     */
     public void getAutoComplete(String query){
         String url = "https://api.deckbrew.com/mtg/cards/typeahead?q=" + query;
-        cardImage.setVisibility(View.GONE); //Clear image if present
+        cardImage.setVisibility(View.GONE); //Hide all of this to show ListView
         textView.setVisibility(View.GONE);
+        addCardBtn.setVisibility(View.GONE);
         getListView().setVisibility(View.VISIBLE);
         new DownloadSuggestionTask().execute(url);
 
@@ -188,7 +225,6 @@ public class CardLookupFragment extends ListFragment {
 
     @Override
     public void onListItemClick(ListView l, View v, int pos, long id){
-        //TODO: click to view whole list
         String query = (String)l.getItemAtPosition(pos);
         testConnection(query);
         l.setVisibility(View.GONE);
@@ -199,7 +235,7 @@ public class CardLookupFragment extends ListFragment {
     @Override
     public void onAttach(Activity activity){
         super.onAttach(activity);
-        if(isAttachedToMain()){
+        if(isAttachedToMain()){ //Check if attaching activity implemented interface
             try{
                 mCallback = (OnSearchSelectedListener) activity;
             } catch (ClassCastException e){
@@ -209,16 +245,21 @@ public class CardLookupFragment extends ListFragment {
         }
     }
 
+    /**
+     * Sends request to Deckbrew API to retrieve card JSON.
+     * @param q Name of card to look up.
+     */
     public void testConnection(@Nullable String q){
-        if(q == null){
+        if(q == null){ //TODO: I think this was an older idea
             return;
         }
-        //get rid of spaces
+        //Remove spaces and special characters
         currentQuery = q.toLowerCase().trim().replaceAll("\\s+", "-").replaceAll("[,.;:'`]", "");
         String url = "https://api.deckbrew.com/mtg/cards/" + currentQuery;
         ConnectivityManager connMgr = (ConnectivityManager)
                 getActivity().getSystemService(getActivity().CONNECTIVITY_SERVICE);
         NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
+        //If we have a network connection then send request
         if(networkInfo != null && networkInfo.isConnected()){
             new DownloadWebpageTask().execute(url);
         }
@@ -227,7 +268,9 @@ public class CardLookupFragment extends ListFragment {
         }
     }
 
-    //Async task to lookup a card
+    /**
+     * Async task to look up a card
+     */
     private class DownloadWebpageTask extends AsyncTask<String,Void,String> {
         @Override
         protected String doInBackground(String... urls){
@@ -265,7 +308,10 @@ public class CardLookupFragment extends ListFragment {
         }
     }
 
-    //Async task to check suggestions
+
+    /**
+     * Async task to look up possible matches given a string of characters
+     */
     private class DownloadSuggestionTask extends AsyncTask<String, Void, String> {
         @Override
         protected String doInBackground(String... urls) {
@@ -280,15 +326,12 @@ public class CardLookupFragment extends ListFragment {
 
         @Override
         protected void onPostExecute(String results){
-            String s = results;
             JSONArray jsonArray;
-            try{
+            try{ //Grab all the names of response JSON
                 jsonArray = new JSONArray(results);
                 ArrayList<String> nameList = new ArrayList<String>();
 
-//                StringBuilder suggestions = new StringBuilder("Did you mean: \n");
                 for(int i = 0; i < jsonArray.length(); i++){
-//                    suggestions.append('\t' + jsonArray.getJSONObject(i).getString("name") + '\n');
                     nameList.add(jsonArray.getJSONObject(i).getString("name"));
                 }
                 adapter.clear();
@@ -306,6 +349,9 @@ public class CardLookupFragment extends ListFragment {
         }
     }
 
+    /**
+     * Clears ListView of all entries
+     */
     public void clearList(){
         adapter.clear();
         adapter.notifyDataSetChanged();
@@ -313,7 +359,9 @@ public class CardLookupFragment extends ListFragment {
         getListView().refreshDrawableState();
     }
 
-    //Async task to get card image
+    /**
+     * Async task to get card image.
+     */
     private class DownloadImage extends AsyncTask<String, Void, Bitmap> {
         @Override
         protected Bitmap doInBackground(String... urls){
@@ -336,6 +384,13 @@ public class CardLookupFragment extends ListFragment {
         }
     }
 
+
+    /**
+     * Sends a request and retrieves response from Deckbrew API
+     * @param myurl The URL to get query
+     * @return JSON response
+     * @throws IOException
+     */
     private String downloadUrl(String myurl) throws IOException{
         InputStream is = null;
         try{
@@ -359,6 +414,12 @@ public class CardLookupFragment extends ListFragment {
         }
     }
 
+    /**
+     * Reads the input stream and convert to a string
+     * @param is Input stream from query response
+     * @return String of JSON response
+     * @throws IOException
+     */
     public String readIt(InputStream is)throws IOException {
         Reader reader;
         reader = new InputStreamReader(is, "UTF-8");
@@ -373,6 +434,11 @@ public class CardLookupFragment extends ListFragment {
         return stringBuilder.toString();
     }
 
+    /**
+     * Grabs relevant information of the card to display on screen.
+     * TODO: Determine card type and display accordingly
+     * @param results JSON string of response
+     */
     public void printStats(String results){
         JSONObject stats;
         try{
@@ -384,7 +450,7 @@ public class CardLookupFragment extends ListFragment {
             String subtypes = stats.getString("subtypes") + '\n';
             JSONArray sets = stats.getJSONArray("editions");
             StringBuilder setList = new StringBuilder();
-            for(int i = 0; i < sets.length(); i++){
+            for(int i = 0; i < sets.length(); i++){ //Go through all the sets
                 setList.append(sets.getJSONObject(i).getString("set"));
             }
 
@@ -395,6 +461,13 @@ public class CardLookupFragment extends ListFragment {
 
     }
 
+    /**
+     * Gets the image provided by the JSON response
+     * @param results JSON response
+     * @return Bitmap stream of response for the image
+     * @throws JSONException
+     * @throws IOException
+     */
     public Bitmap getImageBitmap(String results) throws JSONException, IOException{
         JSONObject stats;
         stats = new JSONObject(results);

@@ -2,37 +2,36 @@ package arashincleric.com.magicapplicationfun;
 
 import android.app.Activity;
 import android.content.DialogInterface;
-import android.net.Uri;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
 import android.support.v4.app.ListFragment;
 import android.support.v7.app.AlertDialog;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 
-
+/**
+ * Fragment to display a specific deck list
+ */
 public class ViewDeckListFragment extends ListFragment {
-    private final static String DECKLIST_MESSAGE = "com.arashincleric.magicapplicationfun.DECKLIST";
+    private final static String DECKLIST_MESSAGE_MAIN = "com.arashincleric.magicapplicationfun.DECKLISTMAIN";
+    private final static String DECKLIST_MESSAGE_SIDE = "com.arashincleric.magicapplicationfun.DECKLISTSIDE";
     private final static String DECKNAME_MESSAGE = "com.arashincleric.magicapplicationfun.DECKName";
     private OnViewCardListener mCallback;
     private CustomDeckAdapter adapter;
 
     public interface OnViewCardListener {
         public void lookupCard(String cardName);
-        public ArrayList<String> deleteCard(String cardName);
+        public int deleteCard(String cardName, boolean inMain);
 
     }
 
-    public static ViewDeckListFragment newInstance(ArrayList<String> deckList, String deckName) {
+    public static ViewDeckListFragment newInstance(ArrayList<String> mainList, ArrayList<String> sideList, String deckName) {
         ViewDeckListFragment fragment = new ViewDeckListFragment();
         Bundle args = new Bundle();
-        args.putStringArrayList(DECKLIST_MESSAGE, deckList);
+        args.putStringArrayList(DECKLIST_MESSAGE_MAIN, mainList);
+        args.putStringArrayList(DECKLIST_MESSAGE_SIDE, sideList);
         args.putString(DECKNAME_MESSAGE, deckName);
         fragment.setArguments(args);
         return fragment;
@@ -45,7 +44,7 @@ public class ViewDeckListFragment extends ListFragment {
     @Override
     public void onAttach(Activity activity){
         super.onAttach(activity);
-        try{
+        try{ //Make sure parent activity implements interface
             mCallback = (OnViewCardListener) activity;
         } catch (ClassCastException e){
             throw new ClassCastException(activity.toString()
@@ -68,19 +67,29 @@ public class ViewDeckListFragment extends ListFragment {
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState){
         super.onViewCreated(view, savedInstanceState);
-        Bundle args = getArguments();
+        Bundle args = getArguments(); //Get the deck list and add to adapter
         adapter =
-                new CustomDeckAdapter(args.getStringArrayList(DECKLIST_MESSAGE), getActivity(), this);
-
+                new CustomDeckAdapter(getActivity(), this);
+        adapter.updateList(args.getStringArrayList(DECKLIST_MESSAGE_MAIN), true);
+        adapter.updateList(args.getStringArrayList(DECKLIST_MESSAGE_SIDE), false);
         getListView().setAdapter(adapter);
 
     }
 
+    /**
+     * Helper for adapter to call when looking up card
+     * @param cardName
+     */
     public void searchCardInfo(String cardName){
         mCallback.lookupCard(cardName);
     }
 
-    public void deleteCard(final String cardName) {
+    /**
+     * Delete a card from this deck
+     * @param cardName Name of card to remove
+     * @param inMain <tt>true</tt> if deleting from main, <tt>false</tt> otherwise
+     */
+    public void deleteCard(final String cardName, final boolean inMain) {
         String delConfirm = getResources().getString(R.string.alert_confirm_delete);
         String delConfirmMsg = String.format(delConfirm, cardName);
         new AlertDialog.Builder(getActivity())
@@ -88,15 +97,17 @@ public class ViewDeckListFragment extends ListFragment {
                 .setPositiveButton(R.string.alert_yes, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        ArrayList<String> updatedList = mCallback.deleteCard(cardName);
+                        int result = mCallback.deleteCard(cardName, inMain);
                         new AlertDialog.Builder(getActivity())
-                                .setMessage((updatedList != null) ? R.string.alert_success : R.string.alert_error)
+                                .setMessage((result != -1) ? R.string.alert_success_delete : R.string.alert_error_delete)
                                 .setNegativeButton(R.string.alert_close, null)
                                 .show();
 
-                        adapter.updateList(updatedList);
-                        getListView().invalidateViews();
-                        getListView().refreshDrawableState();
+                        if(result != -1){
+                            adapter.removeCard(result,inMain);
+                            getListView().invalidateViews();
+                            getListView().refreshDrawableState();
+                        }
                     }
                 })
                 .setNegativeButton(R.string.alert_cancel, null)

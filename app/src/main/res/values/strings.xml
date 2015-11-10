@@ -27,11 +27,13 @@
     <string name="alert_add_deck_sel">Add card to which deck?</string>
     <string name="alert_cancel">Cancel</string>
     <string name="alert_yes">Yes</string>
-    <string name="alert_confirmation">Add the card %1$s to %2$s deck?</string>
+    <string name="alert_confirmation">Add the card %1$s to %2$s deck in:</string>
     <string name="alert_confirm_delete">Delete the card %1$s from this deck?</string>
-    <string name="alert_success">Successfully added card</string>
-    <string name="alert_error">Error adding card</string>
-    <string name="alert_deck_full">Deck is full</string>
+    <string name="alert_success">Successfully added card to %1$s</string>
+    <string name="alert_success_delete">Successfully deleted card</string>
+    <string name="alert_error">Error adding card %1$s</string>
+    <string name="alert_error_delete">Error deleting card</string>
+    <string name="alert_deck_full">Deck %1$s is full</string>
     <string name="alert_close">Close</string>
     <string name="alert_no_decks">You have no decks present</string>
     <string-array name="nav_drawer_menu">

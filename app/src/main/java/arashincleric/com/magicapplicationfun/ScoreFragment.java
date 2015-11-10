@@ -18,10 +18,8 @@ import android.widget.TextView;
 
 
 /**
- * A simple {@link Fragment} subclass.
- * Activities that contain this fragment must implement the
- * Use the {@link ScoreFragment#newInstance} factory method to
- * create an instance of this fragment.
+ * Fragment to keep track of score during a game
+ * TODO: clean up the sharedpreferences stuff because no longer neede(maybe)
  */
 public class ScoreFragment extends Fragment {
 
@@ -116,11 +114,17 @@ public class ScoreFragment extends Fragment {
         });
     }
 
+    /**
+     * Reset the score
+     */
     public void resetScore(){
         score = 20;
         scoreView.setText(Integer.toString(score));
     }
 
+    /**
+     * Decrease score by one
+     */
     private void decreaseScore() {
         if(score > 0){
             score--;
@@ -128,11 +132,18 @@ public class ScoreFragment extends Fragment {
         }
     }
 
+    /**
+     * Increase score by one
+     */
     private void increaseScore() {
         score++;
         scoreView.setText(Integer.toString(score));
     }
 
+    /**
+     * Getter to retrieve score
+     * @return Current score
+     */
     public int getScore(){
         return score;
     }
@@ -148,6 +159,10 @@ public class ScoreFragment extends Fragment {
         super.onStop();
     }
 
+    /**
+     * Set the score during configuration change or new game
+     * @param savedScore Score to display on screen
+     */
     public void setScoreView(String savedScore){
         if(savedScore != null){
             scoreView.setText(savedScore);

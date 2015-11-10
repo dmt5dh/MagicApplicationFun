@@ -42,7 +42,7 @@ public class MainActivity extends AppCompatActivity implements CardLookupFragmen
     private Fragment mContent;
     private Menu mOptionsMenu;
 
-    private ArrayList<Fragment> fragmentStack = new ArrayList<Fragment>();
+    private ArrayList<Fragment> fragmentStack = new ArrayList<Fragment>(); //Easier to deal with than backstack
 
     private SearchView searchView;
 
@@ -76,10 +76,10 @@ public class MainActivity extends AppCompatActivity implements CardLookupFragmen
     //Override the back logic to support back button for fragments
     @Override
     public void onBackPressed(){
-        if(mDrawerLayout.isDrawerOpen(GravityCompat.START)){
+        if(mDrawerLayout.isDrawerOpen(GravityCompat.START)){ //Close nav drawer if open
             mDrawerLayout.closeDrawers();
         }
-        else if (fragmentStack.size() == 1){
+        else if (fragmentStack.size() == 1){ //If no more fragments exit app
             finish();
         }
         else if (fragmentStack.size() > 1) {
@@ -97,6 +97,10 @@ public class MainActivity extends AppCompatActivity implements CardLookupFragmen
         }
     }
 
+    /**
+     * Gets the current fragment attached to activity
+     * @return Fragment current on activity
+     */
     private Fragment getCurrentFragment(){
         FragmentManager fragmentManager = getSupportFragmentManager();
         String fragmentName = fragmentManager
@@ -104,6 +108,10 @@ public class MainActivity extends AppCompatActivity implements CardLookupFragmen
         return fragmentManager.findFragmentByTag(fragmentName);
     }
 
+    /**
+     * Switches fragments in the main activity.
+     * @param sel Argument string for which fragment to show
+     */
     private void switchFragment(String sel){
         //Check to see if selected fragment is currently visible
         if(mContent == null || !mContent.getTag().equals(sel)){
@@ -113,7 +121,7 @@ public class MainActivity extends AppCompatActivity implements CardLookupFragmen
             //Try to find the fragment
             Fragment fragment = fragmentManager.findFragmentByTag(sel);
 
-            //detach current attached fragment
+            //Hide current attached fragment
             if(mContent != null){
                 transaction.hide(mContent);
             }
@@ -159,6 +167,9 @@ public class MainActivity extends AppCompatActivity implements CardLookupFragmen
         curFragName = sel;
     }
 
+    /**
+     * Used to setup the navigation drawer
+     */
     private void setupDrawer() {
         //Setup the actions to take when opening/closing nav drawer
         mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout,
@@ -187,12 +198,15 @@ public class MainActivity extends AppCompatActivity implements CardLookupFragmen
         mDrawerLayout.setDrawerListener(mDrawerToggle);
     }
 
-    //Associate the data to the listview in nav drawer
+    /**
+     * Add list of items to show on the navigation drawer
+     */
     private void addDrawerItems(){
         String[] navListArray = getResources().getStringArray(R.array.nav_drawer_menu);
         ArrayAdapter<String> mAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, navListArray);
         mDrawerList.setAdapter(mAdapter);
     }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -210,21 +224,13 @@ public class MainActivity extends AppCompatActivity implements CardLookupFragmen
         //Sends search query to search fragment
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
-            public boolean onQueryTextSubmit(String query) {
-                //TODO: Send to cardlookup fragment
-//                if (curFragName.equals(ARG_CARD_LOOKUP)) {
-//                    CardLookupFragment c = (CardLookupFragment) mContent;
-////                    c.testConnection(query);
-//                }
-//
-                //Close searchview afterwards
+            public boolean onQueryTextSubmit(String query) { //Close search and show results
                 mOptionsMenu.findItem(R.id.search).collapseActionView();
                 return true; //Set to true so we don't fire off intent
             }
 
             @Override
-            public boolean onQueryTextChange(String newText) {
-                //TODO: Implement autocomplete when possible
+            public boolean onQueryTextChange(String newText) { //After 1 second do an autocomplete
                 if (!newText.isEmpty()) {
                     handler.removeCallbacks(runnable);
                     handler.postDelayed(runnable, 100);
@@ -234,7 +240,7 @@ public class MainActivity extends AppCompatActivity implements CardLookupFragmen
             }
         });
 
-        //Back button press for searchView
+        //Back button press to collapse searchView and clear list
         searchView.setOnQueryTextFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
@@ -253,13 +259,13 @@ public class MainActivity extends AppCompatActivity implements CardLookupFragmen
     @Override
     protected void onResume(){
         super.onResume();
-        if(mContent != null){
+        if(mContent != null){ //Do this to refresh contents of fragment (mainly decklist)
             mContent.onResume();
         }
     }
 
     @Override
-    public void itemSelected(){
+    public void itemSelected(){ //Call from card lookup fragment to collapse searchview
         mOptionsMenu.findItem(R.id.search).collapseActionView();
     }
 
@@ -268,6 +274,7 @@ public class MainActivity extends AppCompatActivity implements CardLookupFragmen
         DeckListFragment deckListFragment = (DeckListFragment)getSupportFragmentManager()
                 .findFragmentByTag(ARG_CARD_DECKLIST);
 
+        //Check if fragment attached
         if(deckListFragment == null){
             FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
             deckListFragment = DeckListFragment.newInstance();
@@ -280,10 +287,11 @@ public class MainActivity extends AppCompatActivity implements CardLookupFragmen
 
         return deckListFragment.getDeckList();
     }
-    public int addToDeck(String deck, String card){
+    public int addToDeck(String deck, String card, boolean inMain){
         DeckListFragment deckListFragment = (DeckListFragment)getSupportFragmentManager()
                 .findFragmentByTag(ARG_CARD_DECKLIST);
 
+        //Check if fragment attached
         if(deckListFragment == null){
             FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
             deckListFragment = DeckListFragment.newInstance();
@@ -292,7 +300,7 @@ public class MainActivity extends AppCompatActivity implements CardLookupFragmen
             getSupportFragmentManager().executePendingTransactions();
         }
 
-        return deckListFragment.addToDeck(deck, card);
+        return deckListFragment.addToDeck(deck, card, inMain);
     }
 
     //Sync state of nav drawer when activity created
@@ -311,7 +319,7 @@ public class MainActivity extends AppCompatActivity implements CardLookupFragmen
                 mContent = getSupportFragmentManager().findFragmentByTag(curFragName);
             }
 
-            if(scoreFragment != null){
+            if(scoreFragment != null){ //TODO: Replace score but not sure if this needed anymore...
                 String savedScore = savedInstanceState.getString(ARG_SCORE, "20");
                 scoreFragment.setScoreView(savedScore);
             }
@@ -320,6 +328,7 @@ public class MainActivity extends AppCompatActivity implements CardLookupFragmen
         //Set up navigation drawer here to handle configuration change
         addDrawerItems();
         setupDrawer();
+
         //Add hamburger icon on action bar
         if(getSupportActionBar() != null){
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -389,7 +398,7 @@ public class MainActivity extends AppCompatActivity implements CardLookupFragmen
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        //Show an alert when user wnats to play a new game
+        //Show an alert when user ants to play a new game
         if (id == R.id.new_game) {
             final ScoreFragment scoreFragment = (ScoreFragment)getSupportFragmentManager()
                     .findFragmentByTag(ARG_LIFE_COUNTER_FRAGMENT);
@@ -408,8 +417,6 @@ public class MainActivity extends AppCompatActivity implements CardLookupFragmen
             return true;
         }
         else if(id == R.id.new_deck) {
-
-            //TODO:CHECK THIS!
             final DeckListFragment deckListFragment = (DeckListFragment)getSupportFragmentManager()
                     .findFragmentByTag(ARG_CARD_DECKLIST);
             final EditText input = new EditText(this);
@@ -435,6 +442,7 @@ public class MainActivity extends AppCompatActivity implements CardLookupFragmen
         return super.onOptionsItemSelected(item);
     }
 
+    //TODO:DO WE NEED THIS?
     @Override
     protected void onStop(){
         super.onStop();
@@ -445,6 +453,7 @@ public class MainActivity extends AppCompatActivity implements CardLookupFragmen
         editor.commit();
     }
 
+    //TODO:DO WE NEED THIS?
     //Save the score on config change
     @Override
     public void onSaveInstanceState(Bundle savedInstanceState){
