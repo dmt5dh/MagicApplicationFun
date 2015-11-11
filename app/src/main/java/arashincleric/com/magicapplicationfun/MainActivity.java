@@ -16,9 +16,11 @@ import android.os.Bundle;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SearchView;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
@@ -235,6 +237,12 @@ public class MainActivity extends AppCompatActivity implements CardLookupFragmen
                     handler.removeCallbacks(runnable);
                     handler.postDelayed(runnable, 100);
                 }
+                else{
+                    if(mContent != null && getSupportFragmentManager().findFragmentByTag(ARG_CARD_LOOKUP) != null
+                            && getSupportFragmentManager().findFragmentByTag(ARG_CARD_LOOKUP).isVisible()){
+                        ((CardLookupFragment) mContent).clearList();
+                    }
+                }
 
                 return true;
             }
@@ -421,17 +429,40 @@ public class MainActivity extends AppCompatActivity implements CardLookupFragmen
                     .findFragmentByTag(ARG_CARD_DECKLIST);
             final EditText input = new EditText(this);
             input.setHint(R.string.add_deck_hint);
-            new AlertDialog.Builder(this)
-                    .setMessage(R.string.add_deck_confirmation)
+            input.setSingleLine(true);
+            input.setFocusableInTouchMode(true); //Make it focusable for enter button listener
+            input.requestFocus();
+
+            AlertDialog.Builder alert = new AlertDialog.Builder(this);
+
+            alert.setMessage(R.string.add_deck_confirmation)
                     .setPositiveButton(R.string.add_deck, new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
                             deckListFragment.addDeck(input.getText().toString());
                         }
                     })
-                    .setNegativeButton(R.string.alert_cancel,null)
-                    .setView(input)
-                    .show();
+                    .setNegativeButton(R.string.alert_cancel, null)
+                    .setView(input);
+
+            final AlertDialog alertToShow = alert.create(); //Show the keyboard
+            alertToShow.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
+            alertToShow.show();
+
+            input.setOnKeyListener(new View.OnKeyListener() {
+                @Override
+                public boolean onKey(View v, int keyCode, KeyEvent event) {
+                    if (event != null && (keyCode == KeyEvent.KEYCODE_ENTER)
+                            && (event.getAction() == KeyEvent.ACTION_DOWN)) {
+                        deckListFragment.addDeck(input.getText().toString());
+                        if(alertToShow.isShowing()){ //Close the alert dialog manually
+                            alertToShow.cancel();
+                        }
+                        return true;
+                    }
+                    return false;
+                }
+            });
 
         }
 

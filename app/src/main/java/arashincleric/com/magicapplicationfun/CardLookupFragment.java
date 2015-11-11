@@ -214,7 +214,14 @@ public class CardLookupFragment extends ListFragment {
      * @param query The string of characters to enter to search
      */
     public void getAutoComplete(String query){
-        String url = "https://api.deckbrew.com/mtg/cards/typeahead?q=" + query;
+        String urlQuery = query.toLowerCase().trim().replaceAll("\\s+", "%20")
+                .replaceAll("[,]", "%2C")
+                .replaceAll("[.]", "%2E")
+                .replaceAll("[;]", "%3B")
+                .replaceAll("[:]", "%3A")
+                .replaceAll("[']", "%27")
+                .replaceAll("[`]", "%60");
+        String url = "https://api.deckbrew.com/mtg/cards/typeahead?q=" + urlQuery;
         cardImage.setVisibility(View.GONE); //Hide all of this to show ListView
         textView.setVisibility(View.GONE);
         addCardBtn.setVisibility(View.GONE);
@@ -317,8 +324,7 @@ public class CardLookupFragment extends ListFragment {
         protected String doInBackground(String... urls) {
             try{
                 return downloadUrl(urls[0]);
-            }
-            catch(IOException e){
+            } catch(IOException e){
                 Log.i("CARDLOOKUP", "Blank response for suggestions");
                 return "";
             }
