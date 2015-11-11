@@ -21,7 +21,10 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 
 
 /**
@@ -172,7 +175,7 @@ public class DeckListFragment extends ListFragment {
             return -1;
         }
     }
-
+    
     //0: success, 1: main full, 2: side full, 4: error
 
     /**
@@ -206,6 +209,15 @@ public class DeckListFragment extends ListFragment {
                 }
                 else{ //Not full so lets add
                     cardList.put(card);
+                    //Gross but sorts the list
+                    ArrayList<String> sortList = new ArrayList<String>();
+                    for(int i = 0; i < cardList.length(); i++){
+                        sortList.add(cardList.getString(i));
+                    }
+                    Collections.sort(sortList);
+                    for(int i = 0; i < cardList.length(); i++){
+                        cardList.put(i, sortList.get(i));
+                    }
                     deckListObj.put(whichBoard, cardList);
                     deckObject.put("deckList", deckListObj);
                     deckArray.put(pos, deckObject);
