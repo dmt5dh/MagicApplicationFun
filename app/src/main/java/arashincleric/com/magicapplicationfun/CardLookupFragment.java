@@ -30,9 +30,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.lang.reflect.Array;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 
 /**
@@ -43,6 +45,23 @@ import java.util.ArrayList;
 public class CardLookupFragment extends ListFragment {
 
 
+    final class Edition{
+        public String edition;
+        public String artist;
+        public String rarity;
+        public String imageURL;
+        public Edition(String edition, String artist, String rarity, String imageURL){
+            this.edition = edition;
+            this.artist = artist;
+            this.rarity = rarity;
+            this.imageURL = imageURL;
+        }
+    }
+
+    private static final String[] text = {"Card Name: ", "Mana Cost: ","Converted Mana Cost: ",
+            "Types: ", "Card Text: ","Loyalty: ", "Power/Toughness: ", "Edition: ", "Rarity: "
+            , "Artist: " };
+
     private ImageView cardImage;
     private TextView textView;
     private String currentQuery;
@@ -50,6 +69,7 @@ public class CardLookupFragment extends ListFragment {
     private OnSearchSelectedListener mCallback;
     private Button addCardBtn;
     private String currentCard;
+    private ArrayList<Edition> currentCardEditions;
 
     //Tell activity to clean up search bar when something chosen
     public interface OnSearchSelectedListener {
@@ -442,25 +462,96 @@ public class CardLookupFragment extends ListFragment {
 
     /**
      * Grabs relevant information of the card to display on screen.
-     * TODO: Determine card type and display accordingly
      * @param results JSON string of response
      */
     public void printStats(String results){
         JSONObject stats;
         try{
             stats = new JSONObject(results);
-            //TODO: specify what info to print and remove brackets in some values
-            currentCard = stats.getString("name");
-            String name = stats.getString("name") + '\n';
-            String types = stats.getString("types") + '\n';
-            String subtypes = stats.getString("subtypes") + '\n';
-            JSONArray sets = stats.getJSONArray("editions");
-            StringBuilder setList = new StringBuilder();
-            for(int i = 0; i < sets.length(); i++){ //Go through all the sets
-                setList.append(sets.getJSONObject(i).getString("set"));
+            String cardNameText = stats.getString("name");
+            currentCard = cardNameText;
+            JSONArray types = stats.getJSONArray("types");
+            String cardType;
+            //Card shouldn't be more than 2 types
+            if (types.length() > 1){ //Get the second field b/c it will show us the real basic type
+                cardType = types.getString(1);
+            }
+            else{
+                cardType = types.getString(0);
             }
 
-            textView.setText(name + types + subtypes + setList.toString());
+            HashMap<String, String> cardValues = new HashMap<String, String>();
+            cardValues.put(text[0], cardNameText); //Name
+
+            if(cardType.equals("land")){
+                cardValues.put(text[1], null); //Cost
+                cardValues.put(text[2], null); //CMC
+            }
+            else{
+                cardValues.put(text[1], stats.getString("cost")); //Cost
+                cardValues.put(text[2], stats.getString("cmc")); //CMC
+            }
+
+            StringBuilder cardTypesText = new StringBuilder(types.toString().replaceAll("\\[|\\]|,", ""));
+            if(stats.has("supertypes")){
+                cardTypesText.insert(0, stats.getString("supertypes")
+                        .replaceAll("\\[|\\]", "").replaceAll(",", " ") + " ");
+
+            }
+            if(stats.has("subtypes")){
+                cardTypesText.append(" - " + stats.getString("subtypes")
+                        .replaceAll("\\[|\\]", "").replaceAll(",", " "));
+
+            }
+            cardValues.put(text[3], cardTypesText.toString().replaceAll("\"", "")); //Types
+
+            if(cardType.equals("land")){
+                cardValues.put(text[4], null); //Text
+            }
+            else{
+                cardValues.put(text[4], stats.getString("text")); //Text
+            }
+
+            if(cardType.equals("planeswalker")){ //Loyalty
+                cardValues.put(text[5], cardNameText);
+            }
+            else{
+                cardValues.put(text[5], null);
+            }
+
+            if(cardType.equals("creature")){ //P/T
+                cardValues.put(text[6], stats.getString("power") + "/" + stats.getString("toughness"));
+            }
+            else{
+                cardValues.put(text[6], null);
+            }
+
+            JSONArray editionsList = stats.getJSONArray("editions"); //Get all editions here
+            currentCardEditions = new ArrayList<Edition>();
+            for(int i = 0; i < editionsList.length(); i++){
+                JSONObject editionObj = editionsList.getJSONObject(i);
+                if(editionObj.getString("set").equals("Prerelease Events")){
+                    continue; //Skip this because pointless to add
+                }
+                currentCardEditions.add(new Edition(editionObj.getString("set"),
+                        editionObj.getString("artist"), editionObj.getString("rarity"),
+                        editionObj.getString("image_url")));
+
+            }
+
+            cardValues.put(text[7], currentCardEditions.get(0).edition); //Edition
+            cardValues.put(text[8], currentCardEditions.get(0).rarity); //Rarity
+            cardValues.put(text[9], currentCardEditions.get(0).artist); //Artist
+
+
+            StringBuilder displayText = new StringBuilder();
+            for(int i = 0; i < text.length; i++){ //Go through and display what is needed
+                if(cardValues.get(text[i]) != null){
+                    displayText.append(text[i] + cardValues.get(text[i]) + "\n");
+                }
+            }
+
+            textView.setText(displayText.toString());
         } catch (JSONException e){
             Log.e("CARDLOOKUP", "JSON NOT PARSED(PrintStats)");
         }
