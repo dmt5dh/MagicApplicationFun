@@ -11,6 +11,8 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.ListFragment;
+import android.support.v4.view.PagerAdapter;
+import android.support.v4.view.ViewPager;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -70,6 +72,11 @@ public class CardLookupFragment extends ListFragment {
     private Button addCardBtn;
     private String currentCard;
     private ArrayList<Edition> currentCardEditions;
+    HashMap<String, String> cardValues;
+
+    private ViewPager viewPager;
+    private ViewPagerAdapter pageAdapter;
+    private int viewPageIndex; //Used for tracking what info to show
 
     //Tell activity to clean up search bar when something chosen
     public interface OnSearchSelectedListener {
@@ -122,6 +129,29 @@ public class CardLookupFragment extends ListFragment {
 
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState){
+
+        viewPager = (ViewPager)view.findViewById(R.id.pager);
+        pageAdapter = new ViewPagerAdapter(getActivity());
+        viewPager.setAdapter(pageAdapter);
+        viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+            @Override
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+
+            }
+
+            @Override
+            public void onPageSelected(int position) {
+                if(position != viewPageIndex){
+                    viewPageIndex = position;
+                    setText(position);
+                }
+            }
+
+            @Override
+            public void onPageScrollStateChanged(int state) {
+
+            }
+        });
 
         cardImage = (ImageView)view.findViewById(R.id.cardImage);
 
@@ -243,6 +273,7 @@ public class CardLookupFragment extends ListFragment {
                 .replaceAll("[`]", "%60");
         String url = "https://api.deckbrew.com/mtg/cards/typeahead?q=" + urlQuery;
         cardImage.setVisibility(View.GONE); //Hide all of this to show ListView
+        viewPager.setVisibility(View.GONE);
         textView.setVisibility(View.GONE);
         addCardBtn.setVisibility(View.GONE);
         getListView().setVisibility(View.VISIBLE);
@@ -321,8 +352,10 @@ public class CardLookupFragment extends ListFragment {
             }
             else{ //Otherwise just print the stats
                 printStats(results);
-                new DownloadImage().execute(results);
+                new DownloadImages().execute(currentCardEditions);
+//                new DownloadImage().execute(results);
                 cardImage.setVisibility(View.VISIBLE);
+                viewPager.setVisibility(View.VISIBLE);
                 textView.setVisibility(View.VISIBLE);
                 if(!isAttachedToMain()){
                     addCardBtn.setVisibility(View.GONE);
@@ -410,6 +443,27 @@ public class CardLookupFragment extends ListFragment {
         }
     }
 
+    private class DownloadImages extends AsyncTask<ArrayList<Edition>, Void, ArrayList<Bitmap>>{
+        @Override
+        protected ArrayList<Bitmap> doInBackground(ArrayList<Edition>... urls){
+            try {
+                return getImageBitmaps(urls[0]);
+            } catch(IOException e) {
+                Log.e("IMAGE", "COULD NOT OPEN IMAGE URL");
+            } catch(JSONException e) {
+                Log.e("IMAGE", "COULD NOT PARSE JSON");
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(ArrayList<Bitmap> bitmaps){
+            if(bitmaps != null){
+                pageAdapter.updateView(bitmaps);
+            }
+        }
+    }
+
 
     /**
      * Sends a request and retrieves response from Deckbrew API
@@ -480,7 +534,7 @@ public class CardLookupFragment extends ListFragment {
                 cardType = types.getString(0);
             }
 
-            HashMap<String, String> cardValues = new HashMap<String, String>();
+            cardValues = new HashMap<String, String>();
             cardValues.put(text[0], cardNameText); //Name
 
             if(cardType.equals("land")){
@@ -558,6 +612,21 @@ public class CardLookupFragment extends ListFragment {
 
     }
 
+    //TODO:CLEAN THIS UP
+    public void setText(int pos){
+        cardValues.put(text[7], currentCardEditions.get(pos).edition); //Edition
+        cardValues.put(text[8], currentCardEditions.get(pos).rarity); //Rarity
+        cardValues.put(text[9], currentCardEditions.get(pos).artist); //Artist
+        StringBuilder displayText = new StringBuilder();
+        for(int i = 0; i < text.length; i++){ //Go through and display what is needed
+            if(cardValues.get(text[i]) != null){
+                displayText.append(text[i] + cardValues.get(text[i]) + "\n");
+            }
+        }
+
+        textView.setText(displayText.toString());
+    }
+
     /**
      * Gets the image provided by the JSON response
      * @param results JSON response
@@ -580,6 +649,17 @@ public class CardLookupFragment extends ListFragment {
 
         URL image = new URL(imageURL);
         return BitmapFactory.decodeStream(image.openConnection().getInputStream());
+    }
+
+    public ArrayList<Bitmap> getImageBitmaps(ArrayList<Edition> editions) throws JSONException, IOException{
+        ArrayList<Bitmap> images = new ArrayList<Bitmap>();
+        for(int i = 0; i < editions.size(); i++){
+            String imageURL = editions.get(i).imageURL;
+            URL image = new URL(imageURL);
+            images.add(BitmapFactory.decodeStream(image.openConnection().getInputStream()));
+        }
+
+        return images;
     }
 
 }
