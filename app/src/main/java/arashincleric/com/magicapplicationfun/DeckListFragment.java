@@ -30,6 +30,8 @@ import java.util.Collections;
  */
 public class DeckListFragment extends ListFragment {
 
+    public final static String ARG_DECK_STANDARD = "standard";
+    public final static String ARG_DECK_COMMANDER = "commander";
     public final static String DECK_MAIN_MESSAGE = "com.arashincleric.magicapplicationfun.DECKMAIN";
     public final static String DECK_SIDE_MESSAGE = "com.arashincleric.magicapplicationfun.DECKSIDE";
     public final static String DECK_NAME_MESSAGE = "com.arashincleric.magicapplicationfun.DECKNAME";
@@ -198,10 +200,17 @@ public class DeckListFragment extends ListFragment {
                 JSONObject deckListObj = deckObject.getJSONObject("deckList");
                 String whichBoard = inMain ? "main" : "side";
                 JSONArray cardList = deckListObj.getJSONArray(whichBoard);
-                if(inMain && cardList.length() >= 60){ //Check main
+                String deckType = deckObject.getString("type");
+                if((deckType.equals(DeckListFragment.ARG_DECK_STANDARD) && inMain && //Standard
+                        cardList.length() >= 60) ||
+                        (deckType.equals(DeckListFragment.ARG_DECK_COMMANDER) && inMain && //Commander
+                        cardList.length() >= 99)){ //Check main
                     return 1;
                 }
-                else if(!inMain && cardList.length() >= 15){ // Check side
+                else if((deckType.equals(DeckListFragment.ARG_DECK_STANDARD) && //Standard
+                        !inMain && cardList.length() >= 15) ||
+                        (deckType.equals(DeckListFragment.ARG_DECK_COMMANDER) && //Commander
+                                !inMain && cardList.length() >= 1)){ // Check side
                     return 2;
                 }
                 else{ //Not full so lets add
@@ -293,7 +302,7 @@ public class DeckListFragment extends ListFragment {
      * Add a deck to the deck list
      * @param name Name of deck to add
      */
-    public void addDeck(String name){
+    public void addDeck(String name, String type){
         try{
             //This will pass to the adapter for refresh
             ArrayList<String> deckNamesList = new ArrayList<String>();
@@ -322,6 +331,12 @@ public class DeckListFragment extends ListFragment {
                 deckListObj.putOpt("main", new JSONArray());
                 deckListObj.putOpt("side", new JSONArray());
                 newDeckObject.putOpt("deckList", deckListObj);
+                if(type.equals(ARG_DECK_STANDARD)){
+                    newDeckObject.put("type", ARG_DECK_STANDARD);
+                }
+                else{
+                    newDeckObject.put("type", ARG_DECK_COMMANDER);
+                }
                 deckArray.put(newDeckObject);
                 deckNamesList.add(name);
 

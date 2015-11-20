@@ -43,6 +43,7 @@
     </string-array>
     <string name="alert_delete_deck">Delete this deck (%1$s)?</string>
     <string name="action_delete_deck">Delete deck?</string>
+    <string name="change_score">Change game type</string>
     
 
 

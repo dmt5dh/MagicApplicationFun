@@ -391,6 +391,7 @@ public class MainActivity extends AppCompatActivity implements CardLookupFragmen
             switch(curFragName){
                 case ARG_LIFE_COUNTER_FRAGMENT:
                     menu.findItem(R.id.new_game).setVisible(true);
+                    menu.findItem(R.id.change_score).setVisible(true);
                     break;
                 case ARG_CARD_LOOKUP:
                     menu.findItem(R.id.search).setVisible(true);
@@ -438,13 +439,15 @@ public class MainActivity extends AppCompatActivity implements CardLookupFragmen
             input.setFocusableInTouchMode(true); //Make it focusable for enter button listener
             input.requestFocus();
 
+            final String deckType = DeckListFragment.ARG_DECK_STANDARD;
+
             AlertDialog.Builder alert = new AlertDialog.Builder(this);
 
             alert.setMessage(R.string.add_deck_confirmation)
                     .setPositiveButton(R.string.add_deck, new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-                            deckListFragment.addDeck(input.getText().toString());
+                            deckListFragment.addDeck(input.getText().toString(), deckType);
                         }
                     })
                     .setNegativeButton(R.string.alert_cancel, null)
@@ -452,14 +455,48 @@ public class MainActivity extends AppCompatActivity implements CardLookupFragmen
 
             final AlertDialog alertToShow = alert.create(); //Show the keyboard
             alertToShow.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
-            alertToShow.show();
+//            alertToShow.show();
+
+            String[] choices = {"60 card", "100 card commander"};
+            final boolean[] choicesSel = {true, false};
+            new AlertDialog.Builder(this)
+                    .setTitle("What type of deck?")
+                    .setMultiChoiceItems(choices, choicesSel, new DialogInterface.OnMultiChoiceClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which, boolean isChecked) {
+                            if(isChecked){
+                                switch(which){
+                                    case 0:
+                                        choicesSel[0]=true;
+                                        ((AlertDialog)dialog).getListView().setItemChecked(0, true);
+                                        choicesSel[1]=false;
+                                        ((AlertDialog)dialog).getListView().setItemChecked(1, false);
+                                        break;
+                                    case 1:
+                                        choicesSel[0]=false;
+                                        ((AlertDialog)dialog).getListView().setItemChecked(0, false);
+                                        choicesSel[1]=true;
+                                        ((AlertDialog)dialog).getListView().setItemChecked(1, true);
+                                        break;
+                                }
+                            }
+                        }
+                    })
+                    .setPositiveButton("Next", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            alertToShow.show();
+                        }
+                    })
+                    .setNegativeButton(R.string.alert_cancel, null)
+                    .show();
 
             input.setOnKeyListener(new View.OnKeyListener() {
                 @Override
                 public boolean onKey(View v, int keyCode, KeyEvent event) {
                     if (event != null && (keyCode == KeyEvent.KEYCODE_ENTER)
                             && (event.getAction() == KeyEvent.ACTION_DOWN)) {
-                        deckListFragment.addDeck(input.getText().toString());
+                        deckListFragment.addDeck(input.getText().toString(), deckType);
                         if(alertToShow.isShowing()){ //Close the alert dialog manually
                             alertToShow.cancel();
                         }
@@ -469,6 +506,50 @@ public class MainActivity extends AppCompatActivity implements CardLookupFragmen
                 }
             });
 
+        }
+        else if(id == R.id.change_score){
+            final ScoreFragment scoreFragment = (ScoreFragment)getSupportFragmentManager()
+                    .findFragmentByTag(ARG_LIFE_COUNTER_FRAGMENT);
+            if (scoreFragment != null){
+                final String[] scoreChoices = {"Standard", "Commander"};
+                final boolean[] scoreChoicesSel = {true, false};
+                new AlertDialog.Builder(this)
+                        .setTitle("Change starting score to:")
+                        .setMultiChoiceItems(scoreChoices, scoreChoicesSel, new DialogInterface.OnMultiChoiceClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which, boolean isChecked) {
+                                if(isChecked){
+                                    switch(which){
+                                        case 0:
+                                            scoreChoicesSel[0] = true;
+                                            ((AlertDialog)dialog).getListView().setItemChecked(0, true);
+                                            scoreChoicesSel[1] = false;
+                                            ((AlertDialog)dialog).getListView().setItemChecked(1, false);
+                                            break;
+                                        case 1:
+                                            scoreChoicesSel[0] = false;
+                                            ((AlertDialog)dialog).getListView().setItemChecked(0, false);
+                                            scoreChoicesSel[1] = true;
+                                            ((AlertDialog)dialog).getListView().setItemChecked(1, true);
+                                            break;
+                                    }
+                                }
+                            }
+                        })
+                        .setPositiveButton("Reset and Change", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                if(scoreChoicesSel[0]){
+                                    scoreFragment.setScoreView("20");
+                                }
+                                else{
+                                    scoreFragment.setScoreView("40");
+                                }
+                            }
+                        })
+                        .setNegativeButton(R.string.alert_cancel, null)
+                        .show();
+            }
         }
 
         if (mDrawerToggle.onOptionsItemSelected(item)) {

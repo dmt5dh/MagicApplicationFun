@@ -73,74 +73,81 @@ public class DecklistFragmentTest {
 
     @Test
     public void addDeck(){
-        fragment.addDeck("deck1");
+        fragment.addDeck("deck1", DeckListFragment.ARG_DECK_STANDARD);
         assertEquals(fragment.getDeckJson().toString(), "[{\"name\":\"deck1\"," +
-                "\"deckList\":{\"main\":[],\"side\":[]}}]");
+                "\"deckList\":{\"main\":[],\"side\":[]},\"type\":\"standard\"}]");
+    }
+
+    @Test
+    public void addDeckCommander(){
+        fragment.addDeck("deck1", DeckListFragment.ARG_DECK_COMMANDER);
+        assertEquals(fragment.getDeckJson().toString(), "[{\"name\":\"deck1\"," +
+                "\"deckList\":{\"main\":[],\"side\":[]},\"type\":\"commander\"}]");
     }
 
     @Test
     public void addDeckMulti(){
-        fragment.addDeck("deck1");
+        fragment.addDeck("deck1", DeckListFragment.ARG_DECK_STANDARD);
         assertEquals(fragment.getDeckJson().toString(), "[{\"name\":\"deck1\"," +
-                "\"deckList\":{\"main\":[],\"side\":[]}}]");
-        fragment.addDeck("deck2");
+                "\"deckList\":{\"main\":[],\"side\":[]},\"type\":\"standard\"}]");
+        fragment.addDeck("deck2", DeckListFragment.ARG_DECK_STANDARD);
         assertEquals(fragment.getDeckJson().toString(),
-                "[{\"name\":\"deck1\",\"deckList\":{\"main\":[],\"side\":[]}},{\"name\":\"deck2\"," +
-                        "\"deckList\":{\"main\":[],\"side\":[]}}]");
-        fragment.addDeck("deck3");
+                "[{\"name\":\"deck1\",\"deckList\":{\"main\":[],\"side\":[]},\"type\":\"standard\"},{\"name\":\"deck2\"," +
+                        "\"deckList\":{\"main\":[],\"side\":[]},\"type\":\"standard\"}]");
+        fragment.addDeck("deck3", DeckListFragment.ARG_DECK_STANDARD);
         assertEquals(fragment.getDeckJson().toString(),
-                "[{\"name\":\"deck1\",\"deckList\":{\"main\":[],\"side\":[]}},{\"name\":\"deck2\"," +
-                        "\"deckList\":{\"main\":[],\"side\":[]}}," +
-                        "{\"name\":\"deck3\",\"deckList\":{\"main\":[],\"side\":[]}}]");
+                "[{\"name\":\"deck1\",\"deckList\":{\"main\":[],\"side\":[]},\"type\":\"standard\"},{\"name\":\"deck2\"," +
+                        "\"deckList\":{\"main\":[],\"side\":[]},\"type\":\"standard\"}," +
+                        "{\"name\":\"deck3\",\"deckList\":{\"main\":[],\"side\":[]},\"type\":\"standard\"}]");
     }
 
     @Test
     public void addDeckDuplicate(){
-        fragment.addDeck("deck1");
+        fragment.addDeck("deck1", DeckListFragment.ARG_DECK_STANDARD);
         assertEquals(fragment.getDeckJson().toString(), "[{\"name\":\"deck1\"," +
-                "\"deckList\":{\"main\":[],\"side\":[]}}]");
-        fragment.addDeck("deck1");
+                "\"deckList\":{\"main\":[],\"side\":[]},\"type\":\"standard\"}]");
+        fragment.addDeck("deck1", DeckListFragment.ARG_DECK_STANDARD);
         assertEquals(fragment.getDeckJson().toString(), "[{\"name\":\"deck1\"," +
-                "\"deckList\":{\"main\":[],\"side\":[]}}]");
+                "\"deckList\":{\"main\":[],\"side\":[]},\"type\":\"standard\"}]");
     }
 
     @Test
     public void deleteDeck(){
-        fragment.addDeck("deck1");
+        fragment.addDeck("deck1", DeckListFragment.ARG_DECK_STANDARD);
         assertEquals(fragment.getDeckJson().toString(), "[{\"name\":\"deck1\"," +
-                "\"deckList\":{\"main\":[],\"side\":[]}}]");
+                "\"deckList\":{\"main\":[],\"side\":[]},\"type\":\"standard\"}]");
         fragment.deleteDeck("deck1");
         assertEquals(fragment.getDeckJson().toString(), "[]");
     }
 
     @Test
     public void deleteDeckMulti(){
-        fragment.addDeck("deck1");
+        fragment.addDeck("deck1", DeckListFragment.ARG_DECK_STANDARD);
         assertEquals(fragment.getDeckJson().toString(), "[{\"name\":\"deck1\"," +
-                "\"deckList\":{\"main\":[],\"side\":[]}}]");
-        fragment.addDeck("deck2");
+                "\"deckList\":{\"main\":[],\"side\":[]},\"type\":\"standard\"}]");
+        fragment.addDeck("deck2", DeckListFragment.ARG_DECK_STANDARD);
         assertEquals(fragment.getDeckJson().toString(),
-                "[{\"name\":\"deck1\",\"deckList\":{\"main\":[],\"side\":[]}},{\"name\":\"deck2\"," +
-                        "\"deckList\":{\"main\":[],\"side\":[]}}]");
-        fragment.addDeck("deck3");
+                "[{\"name\":\"deck1\",\"deckList\":{\"main\":[],\"side\":[]},\"type\":\"standard\"},{\"name\":\"deck2\"," +
+                        "\"deckList\":{\"main\":[],\"side\":[]},\"type\":\"standard\"}]");
+        fragment.addDeck("deck3", DeckListFragment.ARG_DECK_STANDARD);
         assertEquals(fragment.getDeckJson().toString(),
-                "[{\"name\":\"deck1\",\"deckList\":{\"main\":[],\"side\":[]}},{\"name\":\"deck2\"," +
-                        "\"deckList\":{\"main\":[],\"side\":[]}}," +
-                        "{\"name\":\"deck3\",\"deckList\":{\"main\":[],\"side\":[]}}]");
+                "[{\"name\":\"deck1\",\"deckList\":{\"main\":[],\"side\":[]},\"type\":\"standard\"},{\"name\":\"deck2\"," +
+                        "\"deckList\":{\"main\":[],\"side\":[]},\"type\":\"standard\"}," +
+                        "{\"name\":\"deck3\",\"deckList\":{\"main\":[],\"side\":[]},\"type\":\"standard\"}]");
         fragment.deleteDeck("deck2");
         assertEquals(fragment.getDeckJson().toString(),
-                "[{\"name\":\"deck1\",\"deckList\":{\"main\":[],\"side\":[]}}," +
-                        "{\"name\":\"deck3\",\"deckList\":{\"main\":[],\"side\":[]}}]");
+                "[{\"name\":\"deck1\",\"deckList\":{\"main\":[],\"side\":[]},\"type\":\"standard\"}," +
+                        "{\"name\":\"deck3\",\"deckList\":{\"main\":[],\"side\":[]},\"type\":\"standard\"}]");
     }
 
     @Test
     public void deleteDeckNonExist(){
-        fragment.addDeck("deck1");
+        fragment.addDeck("deck1", DeckListFragment.ARG_DECK_STANDARD);
         assertEquals(fragment.getDeckJson().toString(), "[{\"name\":\"deck1\"," +
-                "\"deckList\":{\"main\":[],\"side\":[]}}]");
+                "\"deckList\":{\"main\":[],\"side\":[]},\"type\":\"standard\"}]");
         fragment.deleteDeck("deck2");
         assertEquals(fragment.getDeckJson().toString(), "[{\"name\":\"deck1\"," +
-                "\"deckList\":{\"main\":[],\"side\":[]}}]");
+                "\"deckList\":{\"main\":[],\"side\":[]},\"type\":\"standard\"}]");
     }
 
     @Test
@@ -151,7 +158,7 @@ public class DecklistFragmentTest {
     @Test
     public void getDeckNames(){
         for(int i = 0; i < 5; i++){
-            fragment.addDeck("deck" + Integer.toString(i));
+            fragment.addDeck("deck" + Integer.toString(i), DeckListFragment.ARG_DECK_STANDARD);
         }
         ArrayList<String> deckList = fragment.getDeckList();
         assertEquals(deckList.size(), 5);
@@ -162,29 +169,29 @@ public class DecklistFragmentTest {
 
     @Test
     public void addCardToDeckMain(){
-        fragment.addDeck("deck1");
+        fragment.addDeck("deck1", DeckListFragment.ARG_DECK_STANDARD);
         int response = fragment.addToDeck("deck1", "test", true);
         assertEquals(fragment.getDeckJson().toString(), "[{\"name\":\"deck1\"," +
-                "\"deckList\":{\"main\":[\"test\"],\"side\":[]}}]");
+                "\"deckList\":{\"main\":[\"test\"],\"side\":[]},\"type\":\"standard\"}]");
         assertEquals(response, 0);
     }
 
     @Test
     public void addCardToDeckMainMulti(){
-        fragment.addDeck("deck1");
+        fragment.addDeck("deck1", DeckListFragment.ARG_DECK_STANDARD);
         int response = -1;
         for(int i = 0; i < 5; i++){
             response = fragment.addToDeck("deck1", "test", true);
         }
         assertEquals(fragment.getDeckJson().toString(), "[{\"name\":\"deck1\"," +
                 "\"deckList\":{\"main\":[\"test\",\"test\",\"test\",\"test\"," +
-                "\"test\"],\"side\":[]}}]");
+                "\"test\"],\"side\":[]},\"type\":\"standard\"}]");
         assertEquals(response, 0);
     }
 
     @Test
     public void addCardToDeckMainFull(){
-        fragment.addDeck("deck1");
+        fragment.addDeck("deck1", DeckListFragment.ARG_DECK_STANDARD);
         int response = -1;
         for(int i = 0; i < 61; i++){
             response = fragment.addToDeck("deck1", "test", true);
@@ -194,29 +201,29 @@ public class DecklistFragmentTest {
 
     @Test
     public void addCardToDeckSide(){
-        fragment.addDeck("deck1");
+        fragment.addDeck("deck1", DeckListFragment.ARG_DECK_STANDARD);
         int response = fragment.addToDeck("deck1","test",false);
         assertEquals(fragment.getDeckJson().toString(), "[{\"name\":\"deck1\"," +
-                "\"deckList\":{\"main\":[],\"side\":[\"test\"]}}]");
+                "\"deckList\":{\"main\":[],\"side\":[\"test\"]},\"type\":\"standard\"}]");
         assertEquals(response, 0);
     }
 
     @Test
     public void addCardToDeckSideMulti(){
-        fragment.addDeck("deck1");
+        fragment.addDeck("deck1", DeckListFragment.ARG_DECK_STANDARD);
         int response = -1;
         for(int i = 0; i < 5; i++){
             response = fragment.addToDeck("deck1","test",false);
         }
         assertEquals(fragment.getDeckJson().toString(), "[{\"name\":\"deck1\"," +
                 "\"deckList\":{\"main\":[],\"side\":[\"test\"," +
-                "\"test\",\"test\",\"test\",\"test\"]}}]");
+                "\"test\",\"test\",\"test\",\"test\"]},\"type\":\"standard\"}]");
         assertEquals(response, 0);
     }
 
     @Test
     public void addCardToDeckSideFull(){
-        fragment.addDeck("deck1");
+        fragment.addDeck("deck1", DeckListFragment.ARG_DECK_STANDARD);
         int response = -1;
         for(int i = 0; i < 61; i++){
             response = fragment.addToDeck("deck1","test",false);
@@ -237,134 +244,163 @@ public class DecklistFragmentTest {
     }
 
     @Test
+    public void addCardToDeckCommander(){
+        fragment.addDeck("deck1", DeckListFragment.ARG_DECK_COMMANDER);
+        int response = fragment.addToDeck("deck1", "test", true);
+        assertEquals(fragment.getDeckJson().toString(), "[{\"name\":\"deck1\"," +
+                "\"deckList\":{\"main\":[\"test\"],\"side\":[]},\"type\":\"commander\"}]");
+        assertEquals(response, 0);
+    }
+
+    @Test
+    public void addCardToDeckCommanderFullMain(){
+        fragment.addDeck("deck1", DeckListFragment.ARG_DECK_COMMANDER);
+        int response = -1;
+        for(int i = 0; i < 100; i++){
+            response = fragment.addToDeck("deck1","test",true);
+        }
+        assertEquals(response, 1);
+    }
+
+    @Test
+    public void addCardToDeckCommanderFullSide(){
+        fragment.addDeck("deck1", DeckListFragment.ARG_DECK_COMMANDER);
+        int response = -1;
+        for(int i = 0; i < 2; i++){
+            response = fragment.addToDeck("deck1","test",false);
+        }
+        assertEquals(response, 2);
+    }
+
+    @Test
     public void deleteCardFromDeckMain(){
-        fragment.addDeck("deck1");
+        fragment.addDeck("deck1", DeckListFragment.ARG_DECK_STANDARD);
         fragment.addToDeck("deck1", "test", true);
         assertEquals(fragment.getDeckJson().toString(), "[{\"name\":\"deck1\"," +
-                "\"deckList\":{\"main\":[\"test\"],\"side\":[]}}]");
+                "\"deckList\":{\"main\":[\"test\"],\"side\":[]},\"type\":\"standard\"}]");
         int response = fragment.deleteFromDeck("deck1", "test", true);
         assertEquals(fragment.getDeckJson().toString(), "[{\"name\":\"deck1\"," +
-                "\"deckList\":{\"main\":[],\"side\":[]}}]");
+                "\"deckList\":{\"main\":[],\"side\":[]},\"type\":\"standard\"}]");
         assertEquals(response, 0);
     }
 
     @Test
     public void deleteCardFromDeckMainMulti(){
-        fragment.addDeck("deck1");
+        fragment.addDeck("deck1", DeckListFragment.ARG_DECK_STANDARD);
         fragment.addToDeck("deck1", "test", true);
         fragment.addToDeck("deck1", "test1", true);
         fragment.addToDeck("deck1","test2",true);
         assertEquals(fragment.getDeckJson().toString(), "[{\"name\":\"deck1\"," +
-                "\"deckList\":{\"main\":[\"test\",\"test1\",\"test2\"],\"side\":[]}}]");
+                "\"deckList\":{\"main\":[\"test\",\"test1\",\"test2\"],\"side\":[]},\"type\":\"standard\"}]");
         int response = fragment.deleteFromDeck("deck1", "test2", true);
         assertEquals(fragment.getDeckJson().toString(), "[{\"name\":\"deck1\"," +
-                "\"deckList\":{\"main\":[\"test\",\"test1\"],\"side\":[]}}]");
+                "\"deckList\":{\"main\":[\"test\",\"test1\"],\"side\":[]},\"type\":\"standard\"}]");
         assertEquals(response, 2);
     }
 
     @Test
     public void deleteCardFromDeckMainNoExist(){
-        fragment.addDeck("deck1");
+        fragment.addDeck("deck1", DeckListFragment.ARG_DECK_STANDARD);
         fragment.addToDeck("deck1", "test", true);
         fragment.addToDeck("deck1","test1",true);
         fragment.addToDeck("deck1","test2",true);
         assertEquals(fragment.getDeckJson().toString(), "[{\"name\":\"deck1\"," +
-                "\"deckList\":{\"main\":[\"test\",\"test1\",\"test2\"],\"side\":[]}}]");
+                "\"deckList\":{\"main\":[\"test\",\"test1\",\"test2\"],\"side\":[]},\"type\":\"standard\"}]");
         int response = fragment.deleteFromDeck("deck1", "asdf", true);
         assertEquals(fragment.getDeckJson().toString(), "[{\"name\":\"deck1\"," +
-                "\"deckList\":{\"main\":[\"test\",\"test1\",\"test2\"],\"side\":[]}}]");
+                "\"deckList\":{\"main\":[\"test\",\"test1\",\"test2\"],\"side\":[]},\"type\":\"standard\"}]");
         assertEquals(response, -1);
     }
 
     @Test
     public void deleteCardFromDeckSide(){
-        fragment.addDeck("deck1");
+        fragment.addDeck("deck1", DeckListFragment.ARG_DECK_STANDARD);
         fragment.addToDeck("deck1", "test", false);
         assertEquals(fragment.getDeckJson().toString(), "[{\"name\":\"deck1\"," +
-                "\"deckList\":{\"main\":[],\"side\":[\"test\"]}}]");
+                "\"deckList\":{\"main\":[],\"side\":[\"test\"]},\"type\":\"standard\"}]");
         int response = fragment.deleteFromDeck("deck1", "test", false);
         assertEquals(fragment.getDeckJson().toString(), "[{\"name\":\"deck1\"," +
-                "\"deckList\":{\"main\":[],\"side\":[]}}]");
+                "\"deckList\":{\"main\":[],\"side\":[]},\"type\":\"standard\"}]");
         assertEquals(response, 0);
     }
 
     @Test
     public void deleteCardFromDeckSideMulti(){
-        fragment.addDeck("deck1");
+        fragment.addDeck("deck1", DeckListFragment.ARG_DECK_STANDARD);
         fragment.addToDeck("deck1", "test", false);
         fragment.addToDeck("deck1", "test1", false);
         fragment.addToDeck("deck1","test2",false);
         assertEquals(fragment.getDeckJson().toString(), "[{\"name\":\"deck1\"," +
-                "\"deckList\":{\"main\":[],\"side\":[\"test\",\"test1\",\"test2\"]}}]");
+                "\"deckList\":{\"main\":[],\"side\":[\"test\",\"test1\",\"test2\"]},\"type\":\"standard\"}]");
         int response = fragment.deleteFromDeck("deck1", "test2", false);
         assertEquals(fragment.getDeckJson().toString(), "[{\"name\":\"deck1\"," +
-                "\"deckList\":{\"main\":[],\"side\":[\"test\",\"test1\"]}}]");
+                "\"deckList\":{\"main\":[],\"side\":[\"test\",\"test1\"]},\"type\":\"standard\"}]");
         assertEquals(response, 2);
     }
 
     @Test
     public void deleteCardFromDeckSideNoExist(){
-        fragment.addDeck("deck1");
+        fragment.addDeck("deck1", DeckListFragment.ARG_DECK_STANDARD);
         fragment.addToDeck("deck1", "test", false);
         fragment.addToDeck("deck1","test1",false);
         fragment.addToDeck("deck1","test2",false);
         assertEquals(fragment.getDeckJson().toString(), "[{\"name\":\"deck1\"," +
-                "\"deckList\":{\"main\":[],\"side\":[\"test\",\"test1\",\"test2\"]}}]");
+                "\"deckList\":{\"main\":[],\"side\":[\"test\",\"test1\",\"test2\"]},\"type\":\"standard\"}]");
         int response = fragment.deleteFromDeck("deck1", "asdf", false);
         assertEquals(fragment.getDeckJson().toString(), "[{\"name\":\"deck1\"," +
-                "\"deckList\":{\"main\":[],\"side\":[\"test\",\"test1\",\"test2\"]}}]");
+                "\"deckList\":{\"main\":[],\"side\":[\"test\",\"test1\",\"test2\"]},\"type\":\"standard\"}]");
         assertEquals(response, -1);
     }
 
     @Test
      public void deleteCardFromDeckRandom(){
-        fragment.addDeck("deck1");
+        fragment.addDeck("deck1", DeckListFragment.ARG_DECK_STANDARD);
         fragment.addToDeck("deck1", "test", true);
         fragment.addToDeck("deck1","test1",false);
         fragment.addToDeck("deck1","test2",true);
         assertEquals(fragment.getDeckJson().toString(), "[{\"name\":\"deck1\"," +
-                "\"deckList\":{\"main\":[\"test\",\"test2\"],\"side\":[\"test1\"]}}]");
+                "\"deckList\":{\"main\":[\"test\",\"test2\"],\"side\":[\"test1\"]},\"type\":\"standard\"}]");
         int response = fragment.deleteFromDeck("deck1", "test1", false);
         assertEquals(fragment.getDeckJson().toString(), "[{\"name\":\"deck1\"," +
-                "\"deckList\":{\"main\":[\"test\",\"test2\"],\"side\":[]}}]");
+                "\"deckList\":{\"main\":[\"test\",\"test2\"],\"side\":[]},\"type\":\"standard\"}]");
         assertEquals(response, 0);
     }
 
     @Test
      public void deleteCardFromDeckRandomMulti(){
-        fragment.addDeck("deck1");
+        fragment.addDeck("deck1", DeckListFragment.ARG_DECK_STANDARD);
         fragment.addToDeck("deck1", "test", true);
         fragment.addToDeck("deck1", "test1", false);
         fragment.addToDeck("deck1", "test2", true);
         assertEquals(fragment.getDeckJson().toString(), "[{\"name\":\"deck1\"," +
-                "\"deckList\":{\"main\":[\"test\",\"test2\"],\"side\":[\"test1\"]}}]");
+                "\"deckList\":{\"main\":[\"test\",\"test2\"],\"side\":[\"test1\"]},\"type\":\"standard\"}]");
         int response = fragment.deleteFromDeck("deck1", "test1", false);
         assertEquals(fragment.getDeckJson().toString(), "[{\"name\":\"deck1\"," +
-                "\"deckList\":{\"main\":[\"test\",\"test2\"],\"side\":[]}}]");
+                "\"deckList\":{\"main\":[\"test\",\"test2\"],\"side\":[]},\"type\":\"standard\"}]");
         assertEquals(response, 0);
         int response2 = fragment.deleteFromDeck("deck1", "test2", true);
         assertEquals(fragment.getDeckJson().toString(), "[{\"name\":\"deck1\"," +
-                "\"deckList\":{\"main\":[\"test\"],\"side\":[]}}]");
+                "\"deckList\":{\"main\":[\"test\"],\"side\":[]},\"type\":\"standard\"}]");
         assertEquals(response2, 1);
     }
 
     @Test
     public void deleteCardFromDeckRandomNoExist(){
-        fragment.addDeck("deck1");
+        fragment.addDeck("deck1", DeckListFragment.ARG_DECK_STANDARD);
         fragment.addToDeck("deck1", "test", true);
         fragment.addToDeck("deck1", "test1", false);
         fragment.addToDeck("deck1", "test2", true);
         assertEquals(fragment.getDeckJson().toString(), "[{\"name\":\"deck1\"," +
-                "\"deckList\":{\"main\":[\"test\",\"test2\"],\"side\":[\"test1\"]}}]");
+                "\"deckList\":{\"main\":[\"test\",\"test2\"],\"side\":[\"test1\"]},\"type\":\"standard\"}]");
         int response = fragment.deleteFromDeck("deck1", "asdf", false);
         assertEquals(fragment.getDeckJson().toString(), "[{\"name\":\"deck1\"," +
-                "\"deckList\":{\"main\":[\"test\",\"test2\"],\"side\":[\"test1\"]}}]");
+                "\"deckList\":{\"main\":[\"test\",\"test2\"],\"side\":[\"test1\"]},\"type\":\"standard\"}]");
         assertEquals(response, -1);
     }
 
     @Test
     public void onItemClick(){
-        fragment.addDeck("deck1");
+        fragment.addDeck("deck1", DeckListFragment.ARG_DECK_STANDARD);
         fragment.onListItemClick(fragment.getListView(), fragment.getView(), 0, 0);
         Intent expectedIntent = new Intent(fragment.getActivity(), ViewDeckActivity.class);
         ShadowActivity shadowActivity = Shadows.shadowOf(fragment.getActivity());
