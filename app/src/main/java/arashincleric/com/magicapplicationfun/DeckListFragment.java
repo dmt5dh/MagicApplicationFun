@@ -34,7 +34,7 @@ public class DeckListFragment extends ListFragment {
     public final static String DECK_SIDE_MESSAGE = "com.arashincleric.magicapplicationfun.DECKSIDE";
     public final static String DECK_NAME_MESSAGE = "com.arashincleric.magicapplicationfun.DECKNAME";
     private ArrayAdapter<String> adapter;
-    private final String FILENAME = "decklist_json";
+    public final String FILENAME = "decklist_json";
 
 
     public static DeckListFragment newInstance() {

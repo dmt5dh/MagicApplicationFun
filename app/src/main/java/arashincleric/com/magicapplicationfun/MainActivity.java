@@ -32,9 +32,9 @@ import java.util.ArrayList;
 public class MainActivity extends AppCompatActivity implements CardLookupFragment.OnSearchSelectedListener {
 
     public final String ARG_LIFE_COUNTER_FRAGMENT = "LifeCounter";
-    private final String ARG_CARD_LOOKUP = "CardLookup";
-    private final String ARG_CARD_DECKLIST= "Decklist";
-    private final String ARG_CURRENT_FRAGMENT= "CurrentFragment";
+    public final String ARG_CARD_LOOKUP = "CardLookup";
+    public final String ARG_CARD_DECKLIST= "Decklist";
+    public final String ARG_CURRENT_FRAGMENT= "CurrentFragment";
     private static final String ARG_SCORE = "SCORE";
     private ListView mDrawerList;
     private String curFragName;
@@ -56,6 +56,10 @@ public class MainActivity extends AppCompatActivity implements CardLookupFragmen
             c.getAutoComplete(searchView.getQuery().toString());
         }
     };
+
+    public Fragment getFragment(){
+        return mContent;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -114,7 +118,7 @@ public class MainActivity extends AppCompatActivity implements CardLookupFragmen
      * Switches fragments in the main activity.
      * @param sel Argument string for which fragment to show
      */
-    private void switchFragment(String sel){
+    public void switchFragment(String sel){
         //Check to see if selected fragment is currently visible
         if(mContent == null || !mContent.getTag().equals(sel)){
             FragmentManager fragmentManager = getSupportFragmentManager();
@@ -148,9 +152,9 @@ public class MainActivity extends AppCompatActivity implements CardLookupFragmen
             }
             else {
                 mContent = fragment;
-                if(fragmentStack.size() == 3) { //Get the fragment and put on top of stack but retain rest of stack
+                if(fragmentStack.size() >= 3) { //Get the fragment and put on top of stack but retain rest of stack
                     fragmentStack.remove(fragmentStack.indexOf(mContent));
-                    fragmentStack.add(2, mContent);
+                    fragmentStack.add(mContent);
 
                 }
                 else{
@@ -239,7 +243,8 @@ public class MainActivity extends AppCompatActivity implements CardLookupFragmen
                 }
                 else{
                     if(mContent != null && getSupportFragmentManager().findFragmentByTag(ARG_CARD_LOOKUP) != null
-                            && getSupportFragmentManager().findFragmentByTag(ARG_CARD_LOOKUP).isVisible()){
+                            && getSupportFragmentManager().findFragmentByTag(ARG_CARD_LOOKUP).isVisible()
+                            && mContent.getClass() == CardLookupFragment.class){
                         ((CardLookupFragment) mContent).clearList();
                     }
                 }

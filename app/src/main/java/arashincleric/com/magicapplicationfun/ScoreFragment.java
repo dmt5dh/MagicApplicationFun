@@ -125,7 +125,7 @@ public class ScoreFragment extends Fragment {
     /**
      * Decrease score by one
      */
-    private void decreaseScore() {
+    public void decreaseScore() {
         if(score > 0){
             score--;
             scoreView.setText(Integer.toString(score));
@@ -135,7 +135,7 @@ public class ScoreFragment extends Fragment {
     /**
      * Increase score by one
      */
-    private void increaseScore() {
+    public void increaseScore() {
         score++;
         scoreView.setText(Integer.toString(score));
     }
@@ -165,8 +165,10 @@ public class ScoreFragment extends Fragment {
      */
     public void setScoreView(String savedScore){
         if(savedScore != null){
-            scoreView.setText(savedScore);
-            score = Integer.parseInt(savedScore);
+            if(Integer.parseInt(savedScore) >= 0){
+                scoreView.setText(savedScore);
+                score = Integer.parseInt(savedScore);
+            }
         }
         else {
             score = 20;

@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.DialogInterface;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.media.Image;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
@@ -84,6 +85,10 @@ public class CardLookupFragment extends ListFragment {
         public ArrayList<String> getDeckList();
         public int addToDeck(String deck, String card, boolean isMain);
 
+    }
+
+    public String getTextViewText(){
+        return textView.getText().toString();
     }
 
     /**
@@ -278,7 +283,6 @@ public class CardLookupFragment extends ListFragment {
         addCardBtn.setVisibility(View.GONE);
         getListView().setVisibility(View.VISIBLE);
         new DownloadSuggestionTask().execute(url);
-
     }
 
     @Override

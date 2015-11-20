@@ -11,6 +11,9 @@ android {
         versionCode 1
         versionName "1.0"
     }
+    sourceSets {
+        instrumentTest.setRoot('src/test')
+    }
     buildTypes {
         release {
             minifyEnabled false
@@ -22,4 +25,8 @@ android {
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     compile 'com.android.support:appcompat-v7:22.2.1'
+
+    testCompile 'junit:junit:4.12'
+    testCompile "org.robolectric:robolectric:3.0"
+    testCompile 'org.robolectric:shadows-support-v4:3.0'
 }
