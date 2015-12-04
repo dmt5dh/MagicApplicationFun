@@ -21,6 +21,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
@@ -213,6 +214,13 @@ public class MainActivity extends AppCompatActivity implements CardLookupFragmen
         mDrawerList.setAdapter(mAdapter);
     }
 
+    public void closeKeyboard(){
+        if(getCurrentFocus() != null){
+            InputMethodManager inputMethodManager = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
+            inputMethodManager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);
+        }
+    }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -244,7 +252,8 @@ public class MainActivity extends AppCompatActivity implements CardLookupFragmen
                 else{
                     if(mContent != null && getSupportFragmentManager().findFragmentByTag(ARG_CARD_LOOKUP) != null
                             && getSupportFragmentManager().findFragmentByTag(ARG_CARD_LOOKUP).isVisible()
-                            && mContent.getClass() == CardLookupFragment.class){
+                            && mContent.getClass() == CardLookupFragment.class
+                            && ((CardLookupFragment)mContent).getListView().getCount() == 0){
                         ((CardLookupFragment) mContent).clearList();
                     }
                 }
@@ -259,9 +268,9 @@ public class MainActivity extends AppCompatActivity implements CardLookupFragmen
             public void onFocusChange(View v, boolean hasFocus) {
                 if (!hasFocus) {
                     mOptionsMenu.findItem(R.id.search).collapseActionView();
-                    searchView.setQuery("", false);
-                    CardLookupFragment c = (CardLookupFragment) mContent;
-                    c.clearList();
+//                    searchView.setQuery("", false);
+//                    CardLookupFragment c = (CardLookupFragment) mContent;
+//                    c.clearList();
                 }
             }
         });

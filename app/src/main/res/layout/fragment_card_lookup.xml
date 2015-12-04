@@ -8,30 +8,229 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"/>
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/search_intro"
-        android:id="@+id/cardInfo"
-        android:layout_gravity="left|top" />
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
 
-    <ImageView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/cardImage"
-        android:layout_gravity="left|center_vertical" />
+        <!--<TextView-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:text="@string/search_intro"-->
+        <!--android:id="@+id/cardInfo"-->
+        <!--android:layout_gravity="left|top"-->
+        <!--android:layout_below="@+id/add_button"-->
+        <!--android:layout_centerHorizontal="true"-->
+        <!--android:layout_marginTop="44dp" />-->
 
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/add_card"
-        android:id="@+id/add_button"
-        android:layout_gravity="center_horizontal|bottom" />
 
-    <android.support.v4.view.ViewPager
-        android:id="@+id/pager"
-        android:layout_width="150dp"
-        android:layout_height="210dp"
-        android:layout_gravity="left|bottom" />
+        <ProgressBar
+            android:id="@+id/progress_bar"
+            android:layout_width="300dp"
+            android:layout_height="300dp"
+            android:indeterminate="true"
+            android:layout_gravity="center_horizontal|top"
+            android:layout_centerVertical="true"
+            android:layout_centerHorizontal="true" />
+
+    </RelativeLayout>
+
+    <!--<GridLayout-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="match_parent"-->
+        <!--android:rowCount="2"-->
+        <!--android:columnCount="1"-->
+        <!--android:layout_margin="10dp">-->
+        <!--<LinearLayout-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="210dp"-->
+            <!--android:weightSum="2"-->
+            <!--android:orientation="horizontal"-->
+            <!--android:layout_row="0"-->
+            <!--android:layout_column="0"-->
+            <!--android:layout_rowWeight="0.5">-->
+
+            <!--<android.support.v4.view.ViewPager-->
+                <!--android:id="@+id/pager"-->
+                <!--android:layout_width="150dp"-->
+                <!--android:layout_height="210dp"-->
+                <!--android:layout_gravity="bottom"-->
+                <!--android:layout_weight="1" />-->
+
+            <!--<Button-->
+                <!--android:layout_width="wrap_content"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:text="@string/add_card"-->
+                <!--android:id="@+id/add_button"-->
+                <!--android:layout_gravity="center_horizontal|bottom"-->
+                <!--android:layout_weight="1" />-->
+
+        <!--</LinearLayout>-->
+
+        <!--<ScrollView-->
+
+            <!--android:layout_height="wrap_content"-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:scrollbars="vertical"-->
+            <!--android:layout_row="1"-->
+            <!--android:layout_column="0"-->
+            <!--android:layout_rowWeight="0.5">-->
+
+            <!--<TextView-->
+                <!--android:layout_width="wrap_content"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:text="@string/search_intro"-->
+                <!--android:id="@+id/cardInfo" />-->
+
+        <!--</ScrollView>-->
+        <!--&lt;!&ndash;<TextView&ndash;&gt;-->
+            <!--&lt;!&ndash;android:layout_width="wrap_content"&ndash;&gt;-->
+            <!--&lt;!&ndash;android:layout_height="wrap_content"&ndash;&gt;-->
+            <!--&lt;!&ndash;android:text="@string/search_intro"&ndash;&gt;-->
+            <!--&lt;!&ndash;android:id="@+id/cardInfo"&ndash;&gt;-->
+            <!--&lt;!&ndash;android:layout_gravity="center_horizontal"&ndash;&gt;-->
+            <!--&lt;!&ndash;android:layout_row="1"&ndash;&gt;-->
+            <!--&lt;!&ndash;android:layout_column="0"&ndash;&gt;-->
+            <!--&lt;!&ndash;android:layout_rowWeight="0.5" />&ndash;&gt;-->
+
+
+
+    <!--</GridLayout>-->
+
+    <!--<LinearLayout-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="match_parent"-->
+        <!--android:layout_margin="10dp"-->
+        <!--android:orientation="vertical"-->
+        <!--android:weightSum="1">-->
+
+        <!--<LinearLayout-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:orientation="horizontal"-->
+            <!--android:id="@+id/cardInfoItems"-->
+            <!--android:layout_weight="0.3">-->
+
+            <!--<android.support.v4.view.ViewPager-->
+                <!--android:id="@+id/pager"-->
+                <!--android:layout_width="wrap_content"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:layout_gravity="bottom" />-->
+
+            <!--<Button-->
+                <!--android:layout_width="wrap_content"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:text="@string/add_card"-->
+                <!--android:id="@+id/add_button"-->
+                <!--android:layout_gravity="center_horizontal|bottom" />-->
+
+        <!--</LinearLayout>-->
+
+        <!--<ScrollView-->
+
+            <!--android:layout_height="wrap_content"-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:scrollbars="vertical"-->
+            <!--android:fadeScrollbars="false"-->
+            <!--android:layout_weight="0.7">-->
+
+            <!--<TextView-->
+                <!--android:layout_width="wrap_content"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:text="@string/search_intro"-->
+                <!--android:id="@+id/cardInfo" />-->
+
+        <!--</ScrollView>-->
+
+    <!--</LinearLayout>-->
+
+    <ScrollView
+
+        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:scrollbars="vertical"
+        android:id="@+id/scroll_view"
+        android:fadeScrollbars="false">
+
+        <GridLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:rowCount="2"
+            android:columnCount="1"
+            android:layout_margin="10dp">
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:weightSum="2"
+                android:orientation="vertical"
+                android:layout_row="0"
+                android:layout_column="0"
+                android:layout_rowWeight="0.5">
+
+                <android.support.v4.view.ViewPager
+                    android:id="@+id/pager"
+                    android:layout_width="250dp"
+                    android:layout_height="350dp"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_weight="1" />
+
+                <Button
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/add_card"
+                    android:id="@+id/add_button"
+                    android:layout_gravity="center_horizontal|bottom"
+                    android:layout_weight="1" />
+
+            </LinearLayout>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/search_intro"
+                android:id="@+id/cardInfo"
+                android:layout_row="1"
+                android:layout_column="0"
+                android:layout_rowWeight="0.5"
+                android:textSize="15sp"/>
+        </GridLayout>
+    </ScrollView>
+
+    <!--<ListView-->
+        <!--android:id="@android:id/list"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="match_parent"/>-->
+
+    <!--<TextView-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:text="@string/search_intro"-->
+        <!--android:id="@+id/cardInfo"-->
+        <!--android:layout_gravity="left|top" />-->
+
+    <!--<ImageView-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:id="@+id/cardImage"-->
+        <!--android:layout_gravity="left|center_vertical" />-->
+
+    <!--<Button-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:text="@string/add_card"-->
+        <!--android:id="@+id/add_button"-->
+        <!--android:layout_gravity="center_horizontal|bottom" />-->
+
+    <!--<android.support.v4.view.ViewPager-->
+        <!--android:id="@+id/pager"-->
+        <!--android:layout_width="150dp"-->
+        <!--android:layout_height="210dp"-->
+        <!--android:layout_gravity="left|bottom" />-->
+
+
+    <!--<ProgressBar-->
+        <!--android:id="@+id/progress_bar"-->
+        <!--android:layout_width="300dp"-->
+        <!--android:layout_height="300dp"-->
+        <!--android:indeterminate="true"-->
+        <!--android:layout_gravity="center_horizontal|top" />-->
 
 </FrameLayout>

@@ -4,25 +4,65 @@
     tools:context="arashincleric.com.magicapplicationfun.ScoreFragment">
 
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceLarge"
-        android:text="@string/score_value"
-        android:id="@+id/scoreView"
-        android:layout_gravity="center" />
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="horizontal"
+        android:weightSum="3.0">
 
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/decrease_score"
-        android:id="@+id/decrease_score"
-        android:layout_gravity="left|bottom" />
+        <Button
+            android:layout_width="175dp"
+            android:layout_height="175dp"
+            android:text="@string/decrease_score"
+            android:id="@+id/decrease_score"
+            android:background="@drawable/btn_default_holo_light"
+            android:textSize="75sp"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentStart="true" />
 
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/increase_score"
-        android:id="@+id/increase_score"
-        android:layout_gravity="right|bottom" />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:text="@string/score_value"
+            android:id="@+id/scoreView"
+            android:gravity="center_horizontal"
+            android:layout_marginTop="68dp"
+            android:textSize="125sp"
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true" />
+
+        <Button
+            android:layout_width="175dp"
+            android:layout_height="175dp"
+            android:text="@string/increase_score"
+            android:id="@+id/increase_score"
+            android:background="@drawable/btn_default_holo_light"
+            android:textSize="75sp"
+            android:layout_alignBottom="@+id/decrease_score"
+            android:layout_alignParentEnd="true" />
+
+    </RelativeLayout>
+
+    <!--<TextView-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:textAppearance="?android:attr/textAppearanceLarge"-->
+        <!--android:text="@string/score_value"-->
+        <!--android:id="@+id/scoreView"-->
+        <!--android:layout_gravity="center" />-->
+
+    <!--<Button-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:text="@string/decrease_score"-->
+        <!--android:id="@+id/decrease_score"-->
+        <!--android:layout_gravity="left|bottom" />-->
+
+    <!--<Button-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:text="@string/increase_score"-->
+        <!--android:id="@+id/increase_score"-->
+        <!--android:layout_gravity="right|bottom" />-->
 </FrameLayout>

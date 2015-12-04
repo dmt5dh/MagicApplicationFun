@@ -2,6 +2,7 @@ package arashincleric.com.magicapplicationfun;
 
 import android.content.Context;
 import android.graphics.Color;
+import android.graphics.Typeface;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -121,11 +122,14 @@ public class CustomDeckAdapter extends BaseAdapter implements ListAdapter {
             deleteBtn.setVisibility(View.VISIBLE);
             infoBtn.setVisibility(View.VISIBLE);
             cardItem.setTextColor(Color.DKGRAY);
+            cardItem.setTextSize(15);
         }
         else{
             deleteBtn.setVisibility(View.GONE);
             infoBtn.setVisibility(View.GONE);
-            cardItem.setTextColor(Color.RED);
+            cardItem.setTextColor(Color.DKGRAY);
+            cardItem.setTextSize(25);
+            cardItem.setTypeface(null, Typeface.ITALIC);
         }
 
 

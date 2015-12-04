@@ -1,6 +1,8 @@
 package arashincleric.com.magicapplicationfun;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -9,22 +11,30 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.IBinder;
+import android.os.SystemClock;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.ListFragment;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AlertDialog;
+import android.text.Html;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.ProgressBar;
+import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import org.apache.commons.lang3.text.WordUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -33,11 +43,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.io.StringReader;
 import java.lang.reflect.Array;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.concurrent.TimeUnit;
 
 
 /**
@@ -65,7 +77,6 @@ public class CardLookupFragment extends ListFragment {
             "Types: ", "Card Text: ","Loyalty: ", "Power/Toughness: ", "Edition: ", "Rarity: "
             , "Artist: " };
 
-    private ImageView cardImage;
     private TextView textView;
     private String currentQuery;
     private ArrayAdapter<String> adapter;
@@ -79,11 +90,17 @@ public class CardLookupFragment extends ListFragment {
     private ViewPagerAdapter pageAdapter;
     private int viewPageIndex; //Used for tracking what info to show
 
+    private ScrollView scrollView;
+
+    ProgressBar progress;
+    ProgressDialog progressDialog;
+
     //Tell activity to clean up search bar when something chosen
     public interface OnSearchSelectedListener {
         public void itemSelected();
         public ArrayList<String> getDeckList();
         public int addToDeck(String deck, String card, boolean isMain);
+        public void closeKeyboard();
 
     }
 
@@ -119,6 +136,7 @@ public class CardLookupFragment extends ListFragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        progressDialog = new ProgressDialog(getActivity());
         setRetainInstance(true);
     }
 
@@ -134,6 +152,11 @@ public class CardLookupFragment extends ListFragment {
 
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState){
+
+        scrollView = (ScrollView)view.findViewById(R.id.scroll_view);
+
+        progress = (ProgressBar)view.findViewById(R.id.progress_bar);
+        progress.setVisibility(View.GONE);
 
         viewPager = (ViewPager)view.findViewById(R.id.pager);
         pageAdapter = new ViewPagerAdapter(getActivity());
@@ -158,7 +181,6 @@ public class CardLookupFragment extends ListFragment {
             }
         });
 
-        cardImage = (ImageView)view.findViewById(R.id.cardImage);
 
         textView = (TextView)view.findViewById(R.id.cardInfo);
 
@@ -277,7 +299,8 @@ public class CardLookupFragment extends ListFragment {
                 .replaceAll("[']", "%27")
                 .replaceAll("[`]", "%60");
         String url = "https://api.deckbrew.com/mtg/cards/typeahead?q=" + urlQuery;
-        cardImage.setVisibility(View.GONE); //Hide all of this to show ListView
+        //Hide all of this to show ListView
+        scrollView.setVisibility(View.GONE);
         viewPager.setVisibility(View.GONE);
         textView.setVisibility(View.GONE);
         addCardBtn.setVisibility(View.GONE);
@@ -323,7 +346,19 @@ public class CardLookupFragment extends ListFragment {
         NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
         //If we have a network connection then send request
         if(networkInfo != null && networkInfo.isConnected()){
-            new DownloadWebpageTask().execute(url);
+            if(mCallback != null){
+                mCallback.closeKeyboard(); //Testing purposes
+            }
+            progressDialog.setMessage("Retrieving");
+            progressDialog.show();
+            AsyncTask task = new DownloadWebpageTask().execute(url);
+            progress.setVisibility(View.VISIBLE);
+            try{
+                task.get();
+            }
+            catch(Exception e){
+                Log.e("DOWNLOADDATA", e.getStackTrace().toString());
+            }
         }
         else{
             Toast.makeText(getActivity(),"No connection", Toast.LENGTH_LONG).show();
@@ -334,6 +369,13 @@ public class CardLookupFragment extends ListFragment {
      * Async task to look up a card
      */
     private class DownloadWebpageTask extends AsyncTask<String,Void,String> {
+
+        @Override
+        protected void onPreExecute(){
+            progressDialog.setMessage("Retrieving");
+            progressDialog.show();
+        }
+
         @Override
         protected String doInBackground(String... urls){
             try{
@@ -351,14 +393,13 @@ public class CardLookupFragment extends ListFragment {
             //If empty there was an incomplete search so try to find suggestions
             if(results.isEmpty()){
                 String url = "https://api.deckbrew.com/mtg/cards/typeahead?q=" + currentQuery;
-                cardImage.setImageResource(0); //Clear image if present
                 new DownloadSuggestionTask().execute(url);
             }
             else{ //Otherwise just print the stats
                 printStats(results);
-                new DownloadImages().execute(currentCardEditions);
+                //TODO: add progress bar that works
+                AsyncTask task = new DownloadImages().execute(currentCardEditions);
 //                new DownloadImage().execute(results);
-                cardImage.setVisibility(View.VISIBLE);
                 viewPager.setVisibility(View.VISIBLE);
                 textView.setVisibility(View.VISIBLE);
                 if(!isAttachedToMain()){
@@ -366,6 +407,13 @@ public class CardLookupFragment extends ListFragment {
                 }
                 else{
                     addCardBtn.setVisibility(View.VISIBLE);
+                }
+                try{
+                    task.get(5000, TimeUnit.MILLISECONDS);
+                    scrollView.setVisibility(View.VISIBLE);
+                }
+                catch(Exception e){
+                    Log.e("DOWNLOADDATA", e.getStackTrace().toString());
                 }
             }
 
@@ -441,9 +489,7 @@ public class CardLookupFragment extends ListFragment {
 
         @Override
         protected void onPostExecute(Bitmap bmp){
-            if(bmp != null){
-                cardImage.setImageBitmap(bmp);
-            }
+
         }
     }
 
@@ -464,6 +510,10 @@ public class CardLookupFragment extends ListFragment {
         protected void onPostExecute(ArrayList<Bitmap> bitmaps){
             if(bitmaps != null){
                 pageAdapter.updateView(bitmaps);
+            }
+            progress.setVisibility(View.GONE);
+            if(progressDialog.isShowing()){
+                progressDialog.dismiss();
             }
         }
     }
@@ -561,17 +611,29 @@ public class CardLookupFragment extends ListFragment {
                         .replaceAll("\\[|\\]", "").replaceAll(",", " "));
 
             }
-            cardValues.put(text[3], cardTypesText.toString().replaceAll("\"", "")); //Types
+            cardValues.put(text[3], WordUtils.capitalize(cardTypesText.toString().replaceAll("\"", ""))); //Types
 
             if(cardType.equals("land")){
                 cardValues.put(text[4], null); //Text
             }
             else{
-                cardValues.put(text[4], stats.getString("text")); //Text
+                BufferedReader reader = new BufferedReader(new StringReader(stats.getString("text")));
+                String line = null;
+                StringBuilder cardTextBuilder = new StringBuilder();
+                try{
+                    while ((line = reader.readLine()) != null){
+                        cardTextBuilder.append("<br />" + "<i>" + line + "</i>");
+                    }
+                } catch(IOException e){
+                    Log.e("GETTEXTCARD", e.getStackTrace().toString());
+                }
+//                String cardText = cardTextBuilder.toString();
+//                cardText = cardText.toString().replace("\n", "<br />");
+                cardValues.put(text[4], cardTextBuilder.toString()); //Text
             }
 
             if(cardType.equals("planeswalker")){ //Loyalty
-                cardValues.put(text[5], cardNameText);
+                cardValues.put(text[5], stats.getString("loyalty"));
             }
             else{
                 cardValues.put(text[5], null);
@@ -605,11 +667,11 @@ public class CardLookupFragment extends ListFragment {
             StringBuilder displayText = new StringBuilder();
             for(int i = 0; i < text.length; i++){ //Go through and display what is needed
                 if(cardValues.get(text[i]) != null){
-                    displayText.append(text[i] + cardValues.get(text[i]) + "\n");
+                    displayText.append("<b>" + text[i] + "</b>" + cardValues.get(text[i]) + "<br />");
                 }
             }
 
-            textView.setText(displayText.toString());
+            textView.setText(Html.fromHtml(displayText.toString()));
         } catch (JSONException e){
             Log.e("CARDLOOKUP", "JSON NOT PARSED(PrintStats)");
         }
@@ -624,11 +686,11 @@ public class CardLookupFragment extends ListFragment {
         StringBuilder displayText = new StringBuilder();
         for(int i = 0; i < text.length; i++){ //Go through and display what is needed
             if(cardValues.get(text[i]) != null){
-                displayText.append(text[i] + cardValues.get(text[i]) + "\n");
+                displayText.append("<b>" + text[i] + "</b>" + cardValues.get(text[i]) + "<br />");
             }
         }
 
-        textView.setText(displayText.toString());
+        textView.setText(Html.fromHtml(displayText.toString()));
     }
 
     /**
